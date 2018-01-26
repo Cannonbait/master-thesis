@@ -7,13 +7,14 @@
 #include <iostream>
 
 using namespace std;
+const int m = 12; // Cache-line size.
 
 class PatternBF {
   private:
-    bitset<8> m;
+    vector< bitset<m> > blocks_v;
+    vector< bitset<m> > patterns_v;
   public:
-    PatternBF(int m, int n);
-    //PatternBF(bitset<8> pattern); // TODO
-    void add(bitset<8> pattern); //object
-    bool test(bitset<8> pattern); //object
+    PatternBF(int patterns, int items, int blocks);
+    void add(string obj);
+    bool test(string obj);
 };
