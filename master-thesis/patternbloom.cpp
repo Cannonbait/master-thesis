@@ -27,7 +27,10 @@ bool PatternBF::test(string str) {
   val = tr1::hash<string>()(str);
   val = (val*PRIME_MULTIPLIER) % patterns.size();
   boost::dynamic_bitset<> *pattern = &patterns[val];
+  return test(block, pattern);
+}
 
+bool PatternBF::test(boost::dynamic_bitset<> *block, boost::dynamic_bitset<> *pattern){
   for(int i = 0; i < PATTERN_LENGTH; i++) {
     if((*pattern)[i] == 1 && (*block)[i] != 1) {
       return false;
@@ -36,19 +39,26 @@ bool PatternBF::test(string str) {
   return true;
 }
 
+bool PatternBF::test_rng(){
+  std::uniform_int_distribution<int> dist_patt(0, patterns.size()-1);
+  std::uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
+  return test(&blocks[dist_blk(random_source)], &patterns[dist_patt(random_source)]);
+}
+
 PatternBF::PatternBF(int n, int d, int num_blocks) {
-  // Definitions
   patterns.assign(n, boost::dynamic_bitset<>(PATTERN_LENGTH));
   blocks.assign(num_blocks, boost::dynamic_bitset<>(PATTERN_LENGTH));
   const int k = (PATTERN_LENGTH/d)*log(2);
 
   //Stuff for random patterns
   std::random_device rd;  //Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
-  std::uniform_int_distribution<int> distr(0, PATTERN_LENGTH-1);
+
+  std::mt19937 gen(rd());
+  random_source = gen; //Standard mersenne_twister_engine seeded with rd()
+  std::uniform_int_distribution<int> distribution(0, PATTERN_LENGTH-1);
   for (int i = 0; i < n; i++){
     for (int j = 0; j < k; j++){
-      patterns[i][distr(gen)] = 1;
+      patterns[i][distribution(random_source)] = 1;
     }
   }
 }
