@@ -6,9 +6,9 @@
 
 using namespace std;
 const int TESTS_PER_THREAD = 1000000;
-const int PATTERNS = 4;
+const int PATTERNS = 15;
 const int STORED_ITEMS = 20;
-const int BLOCKS = 10;
+const int BLOCKS = 4;
 
 int main() {
   unsigned concurentThreadsSupported = thread::hardware_concurrency();
@@ -32,7 +32,7 @@ int main() {
     total_false_pos += f.get();
   }
   int total_tests = TESTS_PER_THREAD*(concurentThreadsSupported-1);
-  double exp_prob = 1.0 - (1.0 - pow((1.0/(double)PATTERNS),(double)STORED_ITEMS/(double)BLOCKS));
+  double exp_prob = 1.0 - pow(1.0 - (1.0/(double)PATTERNS),(double)STORED_ITEMS/(double)BLOCKS);
   cout << "Expected theoretical collision FPR is: " << exp_prob*100.0 << "%\n";
   cout << "The FPR is: " << total_false_pos << "/" << total_tests;
   cout << " (" << (static_cast<double>(total_false_pos) / (double)(1.0 * total_tests))*100.0 << "%)\n";
