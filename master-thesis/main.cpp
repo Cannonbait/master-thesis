@@ -2,12 +2,13 @@
 #include <vector>
 #include <thread>
 #include <iostream>
+#include <math.h>
 
 using namespace std;
 const int TESTS_PER_THREAD = 1000000;
-const int PATTERNS = 2;
-const int STORED_ITEMS = 2;
-const int BLOCKS = 2;
+const int PATTERNS = 4;
+const int STORED_ITEMS = 20;
+const int BLOCKS = 10;
 
 int main() {
   unsigned concurentThreadsSupported = thread::hardware_concurrency();
@@ -31,7 +32,8 @@ int main() {
     total_false_pos += f.get();
   }
   int total_tests = TESTS_PER_THREAD*(concurentThreadsSupported-1);
-  cout << "Expected theoretical collision FPR is: " << 1/(double)BLOCKS*1/(double)PATTERNS*STORED_ITEMS << endl;
+  double exp_prob = 1.0 - (1.0 - pow((1.0/(double)PATTERNS),(double)STORED_ITEMS/(double)BLOCKS));
+  cout << "Expected theoretical collision FPR is: " << exp_prob*100.0 << "%\n";
   cout << "The FPR is: " << total_false_pos << "/" << total_tests;
   cout << " (" << (static_cast<double>(total_false_pos) / (double)(1.0 * total_tests))*100.0 << "%)\n";
   return 0;
