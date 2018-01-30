@@ -7,7 +7,7 @@
 #include <iostream>
 
 using namespace std;
-const int m = 12; // Cache-line size.
+const int m = 20; // Cache-line size.
 
 class PatternBF {
   private:
@@ -17,4 +17,6 @@ class PatternBF {
     PatternBF(int patterns, int items, int blocks);
     void add(string obj);
     bool test(string obj);
+    // Function which stores p random patterns in the filter.
+    void store_patterns(int p);
 };

@@ -50,9 +50,13 @@ bool PatternBF::test(string obj) {
 
   for(int i = 0; i < m; i++) {
     if((*pattern)[i] == 1 && (*block)[i] != 1) {
+      cout << "Pattern: " << pattern->to_string() << "\n";
+      cout << "Block: " << block->to_string() << "\n";
       return false;
     }
   }
+  cout << "Pattern: " << pattern->to_string() << "\n";
+  cout << "Block: " << block->to_string() << "\n";
   return true;
 }
 
@@ -74,5 +78,22 @@ PatternBF::PatternBF(int patterns, int items, int blocks) {
     }
     shuffle_bits(pattern, k, i);
     patterns_v.push_back(pattern);
+  }
+}
+
+/*
+  Store p random patterns in the filter.
+*/
+void PatternBF::store_patterns(int p) {
+  for(int i = 0; i < p; i++) {
+    srand(time(0)*1000*(p+1)*(i+1));
+    int val = rand();
+    val = val % blocks_v.size();
+    bitset<m> *block = &blocks_v[val];
+    srand(time(0)*1000*(p+2)*(i+2));
+    val = rand();
+    val = val % patterns_v.size(); 
+    bitset<m> *pattern = &patterns_v[val];
+    (*block) |= (*pattern);
   }
 }
