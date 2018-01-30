@@ -20,6 +20,18 @@ void PatternBF::add(string str) {
   *block = (*block | patterns[val]);
 }
 
+/**
+  * Add x number of patterns to the bloom filter, with random pattern and random block
+**/
+void PatternBF::add(int x) {
+  for(int i = 0; i < x; i++){
+    std::uniform_int_distribution<int> dist_patt(0, patterns.size()-1);
+    std::uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
+    int blk_i = dist_blk(random_source);
+    blocks[blk_i] = ((blocks[blk_i]) | (patterns[dist_patt(random_source)]));
+  }
+}
+
 bool PatternBF::test(string str) {
   size_t val = tr1::hash<string>()(str);
   val = val % blocks.size();
@@ -48,7 +60,7 @@ bool PatternBF::test_rng(){
 PatternBF::PatternBF(int n, int d, int num_blocks) {
   patterns.assign(n, boost::dynamic_bitset<>(PATTERN_LENGTH));
   blocks.assign(num_blocks, boost::dynamic_bitset<>(PATTERN_LENGTH));
-  const int k = (PATTERN_LENGTH/d)*log(2);
+  const int k = (PATTERN_LENGTH/d)*log(2)+1;
 
   //Stuff for random patterns
   std::random_device rd;  //Will be used to obtain a seed for the random number engine

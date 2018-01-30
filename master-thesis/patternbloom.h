@@ -25,6 +25,7 @@ class PatternBF {
     PatternBF(int m, int n, int num_blocks);
     PatternBF(bitset<8> pattern); // TODO
     void add(string str); //object
+    void add(int x);
     bool test(string str); //object
     bool test_rng();
     void print();
