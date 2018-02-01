@@ -16,14 +16,14 @@ void PatternBF::add(string str) {
   val = val % blocks.size();
   boost::dynamic_bitset<> *block = &blocks[val];
   val = tr1::hash<string>()(str);
-  val = (val*PRIME_MULTIPLIER) % PATTERN_LENGTH;
+  val = (val*PRIME_MULTIPLIER) % patterns.size();
   *block = (*block | patterns[val]);
 }
 
 /**
   * Add x number of patterns to the bloom filter, with random pattern and random block
 **/
-void PatternBF::add(int x) {
+void PatternBF::add_many(int x) {
   for(int i = 0; i < x; i++){
     std::uniform_int_distribution<int> dist_patt(0, patterns.size()-1);
     std::uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
@@ -43,7 +43,7 @@ bool PatternBF::test(string str) {
 }
 
 bool PatternBF::test(boost::dynamic_bitset<> *block, boost::dynamic_bitset<> *pattern){
-  for(int i = 0; i < PATTERN_LENGTH; i++) {
+  for(int i = 0; i < patterns.size(); i++) {
     if((*pattern)[i] == 1 && (*block)[i] != 1) {
       return false;
     }
@@ -75,14 +75,14 @@ PatternBF::PatternBF(int n, int d, int num_blocks) {
   }
 }
 
-void PatternBF::print(){
+PatternBF::PatternBF() {}
+
+/*void PatternBF::print(){
   cout << endl << "Patterns" << endl << "---------------------------" << endl;
   print_patterns(patterns);
   cout << endl << "Blocks" << endl << "---------------------------" << endl;
   print_patterns(blocks);
-
-
-}
+}*/
 
 void PatternBF::print_patterns(vector<boost::dynamic_bitset<>> patterns){
   for (int i = 0; i < patterns.size(); i++){
@@ -92,7 +92,7 @@ void PatternBF::print_patterns(vector<boost::dynamic_bitset<>> patterns){
 
 void PatternBF::print_pattern(boost::dynamic_bitset<> pattern){
   std::stringstream ss;
-  for (int i=0; i < pattern.size(); i++){
+  for (size_t i=0; i < pattern.size(); i++){
     if (i != 0){
       ss << ",";
     }
@@ -100,8 +100,3 @@ void PatternBF::print_pattern(boost::dynamic_bitset<> pattern){
   }
   cout << ss.str() << endl;
 }
-
-PatternBF::PatternBF(bitset<8> pattern) {
-  cout << "Not implemented yet" << endl;
-}
-
