@@ -11,7 +11,7 @@ const int NUM_BLOCKS = 25;
 
 int main() {
   PatternBF a = *(new PatternBF(NUM_PATTERNS, NUM_STORED_ITEMS, NUM_BLOCKS));
-  a.add(NUM_STORED_ITEMS);
+  a.add_many(NUM_STORED_ITEMS);
   cout << a.test_rng(10000000) << endl;
   return 0;
 }
