@@ -5,9 +5,9 @@
 #include <math.h>
 
 using namespace std;
-const int NUM_PATTERNS = 50;
-const int NUM_STORED_ITEMS = 1;
-const int NUM_BLOCKS = 50;
+const int NUM_PATTERNS = 20;
+const int NUM_STORED_ITEMS = 100;
+const int NUM_BLOCKS = 20;
 const int PATTERN_LENGTH = 50;
 
 int main() {
@@ -41,4 +41,4 @@ int main() {
 
 
   return 0;
-} 
+}

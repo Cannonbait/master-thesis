@@ -8,7 +8,7 @@ class Worker {
   public:
     void try_items(int items, promise<int> && p);
     void add_item();
-    Worker(int patterns, int items, int blocks);
+    Worker(int bits, int patterns, int items, int blocks);
   private:
     PatternBF filter;
 };

@@ -12,8 +12,8 @@ void Worker::try_items(int items, promise<int> && p) {
   p.set_value(false_positives);
 }
 
-Worker::Worker(int patterns, int items, int blocks)
-  : filter(PatternBF(patterns, items, blocks, 55)) {
+Worker::Worker(int bits, int patterns, int items, int blocks)
+  : filter(PatternBF(patterns, items, blocks, bits)) {
     filter.add_many(items);
 }
 
