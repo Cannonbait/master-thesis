@@ -1,4 +1,5 @@
-#include "patternbloom.h"
+
+#include "filter_framework.h"
 #include <vector>
 #include <thread>
 #include <iostream>
@@ -11,7 +12,20 @@ const int NUM_BLOCKS = 20;
 const int PATTERN_LENGTH = 50;
 
 int main() {
+  // Test for Filter Framework
+  cout << endl << "Filter framework test" << endl;
+  cout << "--------------------------------------------------------------------------" << endl;
+  FilterFramework f(50, 20, 20, 20);
+  f.add_item();
+  f.add_item();
+  f.add_item();
+  f.add_item();
+  f.add_item();
+  cout <<f.test_framework(1000) << endl;
+
   // Test for bloom filter to generate own bloom filters
+  cout << endl << "Self generation test" << endl;
+  cout << "--------------------------------------------------------------------------" << endl;
   PatternBF a (NUM_PATTERNS, NUM_STORED_ITEMS, NUM_BLOCKS, PATTERN_LENGTH);
   a.add_many(NUM_STORED_ITEMS);
   cout << a.test_rng(100000) << endl;
@@ -19,6 +33,8 @@ int main() {
 
 
   // Test for sending patterns to constructor for bloom filter
+  cout << endl << "Passing patterns to filter test" << endl;
+  cout << "--------------------------------------------------------------------------" << endl;
   vector<boost::dynamic_bitset<>*> patterns;
 
   for (int i=0; i < NUM_PATTERNS; i++){
@@ -37,8 +53,6 @@ int main() {
   PatternBF b (patterns, NUM_BLOCKS);
   b.add_many(NUM_STORED_ITEMS);
   cout << b.test_rng(1000000) << endl;
-
-
 
   return 0;
 }
