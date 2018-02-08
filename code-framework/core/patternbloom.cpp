@@ -33,6 +33,7 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
 }
 
 PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_blocks){
+  random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   for (int i=0; i < num_blocks; i++){
     blocks.push_back(new boost::dynamic_bitset<>((*arg_patterns[0]).size()));
   }
