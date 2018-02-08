@@ -1,16 +1,14 @@
 #include "patternbloom.h"
 #include <mutex>
+#include <future>
 
 using namespace std;
 
 class Worker {
   public:
-    int try_items(int items);
+    void try_items(int items, promise<int> && p);
     void add_item();
     Worker(int patterns, int items, int blocks);
-    int collect_fp();
   private:
     PatternBF filter;
-    static mutex mx;
-    static int fp;
 };

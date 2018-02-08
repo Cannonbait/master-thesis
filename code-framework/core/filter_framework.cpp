@@ -24,11 +24,20 @@ double FilterFramework::test_framework(int tests) {
   vector<thread> ts;
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   int tests_per_thread = tests/concurentThreadsSupported;
+  vector< future<int> > futures;
   for(int i = 0; i < workers.size(); i++) {
-    ts.push_back(thread(&Worker::try_items, workers[i], tests_per_thread));
+    promise<int> p;
+    futures.push_back(p.get_future());
+    ts.push_back(thread(&Worker::try_items, workers[i], tests_per_thread, move(p)));
   }
+
   join_all(ts);
-  return workers[0].collect_fp();
+
+  int total_false_pos = 0;
+   for (future<int>& f : futures) {
+     total_false_pos += f.get();
+   }
+  return total_false_pos/(concurentThreadsSupported*tests_per_thread);
 }
 
 void FilterFramework::add_item() {
