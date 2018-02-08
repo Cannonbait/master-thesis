@@ -1,6 +1,5 @@
 #include "patternbloom.h"
 #include <iostream>
-#include <tr1/functional>
 #include <string>
 #include <math.h>
 #include <vector>
@@ -13,7 +12,7 @@
 using namespace std;
 
 
-
+PatternBF::PatternBF(){}
 
 PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
   for (int i=0; i < num_blocks; i++){
@@ -43,8 +42,8 @@ PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_bloc
 }
 
 void PatternBF::add(string str) {
-  int block_index = tr1::hash<string>()(str) % blocks.size();
-  int pattern_index = tr1::hash<string>()(str)*PRIME_MULTIPLIER % patterns.size();
+  int block_index = std::hash<string>()(str) % blocks.size();
+  int pattern_index = std::hash<string>()(str)*PRIME_MULTIPLIER % patterns.size();
   *blocks[block_index] = (*blocks[block_index] | (*patterns[pattern_index]));
 }
 
@@ -61,8 +60,8 @@ void PatternBF::add_many(int x) {
 }
 
 bool PatternBF::test(string str) {
-  int block_index = tr1::hash<string>()(str) % blocks.size();
-  int pattern_index = (tr1::hash<string>()(str)*PRIME_MULTIPLIER) % patterns.size();
+  int block_index = std::hash<string>()(str) % blocks.size();
+  int pattern_index = (std::hash<string>()(str)*PRIME_MULTIPLIER) % patterns.size();
   return test(block_index, pattern_index);
 }
 

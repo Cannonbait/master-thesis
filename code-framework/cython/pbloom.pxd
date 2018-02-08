@@ -1,10 +1,10 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 
-cdef extern from "patternbloom.h":
+cdef extern from "../core/patternbloom.h":
     cdef cppclass PatternBF:
       PatternBF() except +
-      PatternBF(int, int, int) except +
+      PatternBF(int, int, int, int) except +
       void add(string)
       bool test(string)
       void add_many(int)

@@ -1,5 +1,5 @@
 # distutils: language = c++
-# distutils: sources = patternbloom.cpp
+# distutils: sources = ../core/patternbloom.cpp
 
 from libcpp cimport bool
 from pbloom cimport PatternBF
@@ -8,8 +8,8 @@ from cpython.version cimport PY_MAJOR_VERSION
 
 cdef class PyPatternBF:
     cdef PatternBF c_pbf
-    def __cinit__(self,int n, int d, int num_blocks):
-      self.c_pbf = PatternBF(n,d,num_blocks)
+    def __cinit__(self,int n, int d, int num_blocks, int num_bits):
+      self.c_pbf = PatternBF(n,d,num_blocks, num_bits)
     def add(self,my_str):
       text = str.encode(my_str)
       self.c_pbf.add(text)
