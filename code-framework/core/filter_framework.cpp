@@ -16,7 +16,7 @@ FilterFramework::FilterFramework() {}
 FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) : m(bits), n(patterns), d(items), b(blocks) {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   for(int i = 0; i < concurentThreadsSupported; i++) {
-    workers.push_back(Worker(patterns,items,blocks));
+    workers.push_back(Worker(patterns,items,blocks, bits));
   }
 }
 
@@ -37,7 +37,7 @@ double FilterFramework::test_framework(int tests) {
    for (future<int>& f : futures) {
      total_false_pos += f.get();
    }
-  return total_false_pos/(concurentThreadsSupported*tests_per_thread);
+  return ((double)total_false_pos)/((double)(concurentThreadsSupported*tests_per_thread));
 }
 
 void FilterFramework::add_item() {
