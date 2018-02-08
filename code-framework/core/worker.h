@@ -1,4 +1,4 @@
-#include "../patternbloom.h"
+#include "patternbloom.h"
 #include <mutex>
 
 using namespace std;

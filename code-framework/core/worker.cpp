@@ -17,6 +17,6 @@ void Worker::try_items(int items, mutex &mtx) {
 }
 
 Worker::Worker(int patterns, int items, int blocks)
-  : filter(PatternBF(patterns, items, blocks)) {
+  : filter(PatternBF(patterns, items, blocks, 55)) {
     filter.add_many(items);
 }
