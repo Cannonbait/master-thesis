@@ -1,5 +1,5 @@
 # distutils: language = c++
-# distutils: sources = filter_framework.cpp
+# distutils: sources = ../core/filter_framework.cpp
 
 from framework cimport FilterFramework
 from cpython.version cimport PY_MAJOR_VERSION
