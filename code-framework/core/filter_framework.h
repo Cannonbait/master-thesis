@@ -3,7 +3,9 @@
 #endif
 
 #include <vector>
-#include "worker.h"
+#include "patternbloom.h"
+#include <future>
+
 using namespace std;
 
 class FilterFramework {
@@ -11,11 +13,12 @@ class FilterFramework {
     FilterFramework(int bits, int patterns, int items, int blocks);
     FilterFramework();
     void add_item();
+    void replace_patterns(vector< vector<bool> > patterns, int items, int blocks);
     double test_framework(int tests);
   private:
     int m;
     int n;
     int b;
     int d;
-    vector<Worker> workers;
+    vector<PatternBF> filters;
 };

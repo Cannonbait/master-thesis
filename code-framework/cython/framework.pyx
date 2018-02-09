@@ -3,6 +3,8 @@
 
 from framework cimport FilterFramework
 from cpython.version cimport PY_MAJOR_VERSION
+from libcpp.vector cimport vector
+from libcpp cimport bool
 
 cdef class PyFilterFramework:
     cdef FilterFramework ff
@@ -12,3 +14,5 @@ cdef class PyFilterFramework:
       self.ff.add_item()
     def test_framework(self,tests):
       return self.ff.test_framework(tests)
+    def replace_patterns(self,patterns,items,blocks):
+      self.ff.replace_patterns(patterns,items,blocks)
