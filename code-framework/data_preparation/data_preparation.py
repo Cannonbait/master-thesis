@@ -1,5 +1,5 @@
 import sys
-# sys.argv[1:] = ["--source=fastq.fq", "--output=output.prep", "-h1=7", "-h2=13", "-h3=17"]
+sys.argv[1:] = ["--source=fastq.fq", "--output=output.prep", "-h1=7", "-h2=13", "-h3=17"]
 
 
 if (len(sys.argv) < 2
@@ -17,6 +17,7 @@ if not any([s.startswith("--output=") for s in sys.argv]):
     print("Specify output file using --output=")
     sys.exit()
 
+print("Reading from file")
 # Read file and extract relevant lines
 genomes = []
 with open('fastq.fq', 'r') as f:
@@ -29,10 +30,12 @@ with open('fastq.fq', 'r') as f:
 ## A = 01
 ## T = 10
 ## C = 11
+print("Translating characters")
 trans = str.maketrans({'G' : '00', 'A' : '01', 'T' : '10', 'C' : '11', '\n' : ''})
+print("Writing to output file")
 binary_genomes = [line.translate(trans) for line in genomes]
 fileName = [x for x in sys.argv if x.startswith("--output=")][0][9:]
-print(fileName)
+
 
 if not any([s.startswith("-h1=") for s in sys.argv]):
     with open(fileName, 'w+') as f:
