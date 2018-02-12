@@ -24,7 +24,7 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
   const int k = (num_bits/num_items_to_store)*log(2)+1;
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   boost::random::uniform_int_distribution<> pattern_dist(0,num_bits-1);
-  for (int i = 0; i < num_patterns; i++){
+  for (int i = 0; i < num_patterns; i++) {
     for (int j = 0; j < k; j++){
       (*patterns[i])[pattern_dist(random_source)] = 1;
     }
@@ -36,7 +36,7 @@ PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_bloc
   for (int i=0; i < num_blocks; i++){
     blocks.push_back(new boost::dynamic_bitset<>((*arg_patterns[0]).size()));
   }
-  for (int i=0; i < arg_patterns.size(); i++){
+  for (int i=0; i < arg_patterns.size(); i++) {
     patterns.push_back(new boost::dynamic_bitset<>(*arg_patterns[i]));
   }
 }
@@ -60,12 +60,14 @@ void PatternBF::add_many(int x) {
 }
 
 bool PatternBF::test(string str) {
+  random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   int block_index = std::hash<string>()(str) % blocks.size();
   int pattern_index = (std::hash<string>()(str)*PRIME_MULTIPLIER) % patterns.size();
   return test(block_index, pattern_index);
 }
 
 bool PatternBF::test_rng(){
+  random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   std::uniform_int_distribution<int> dist_patt(0, patterns.size()-1);
   std::uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
   return test(dist_blk(random_source), dist_patt(random_source));

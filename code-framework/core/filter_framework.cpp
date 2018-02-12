@@ -70,14 +70,16 @@ double FilterFramework::test_framework(int tests) {
  */
 void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int items, int blocks) {
   vector<boost::dynamic_bitset<>*> arg_patterns(patterns.size());
+  vector<boost::dynamic_bitset<> > patt(patterns.size());
   for(int i = 0; i < patterns.size(); i++) {
-    boost::dynamic_bitset<> pattern(patterns[i].size());
-    for(int j = 0; j < patterns[i].size(); j++) {
-      pattern[j] = patterns[i][j];
+    boost::dynamic_bitset<> bits;
+    bits.clear();
+    patt.push_back(bits);
+    for(int j = 0; j < patterns[0].size(); j++) {
+      patt[i].push_back(patterns[i][j]);
     }
-    arg_patterns[i] = &pattern;
+    arg_patterns[i] = &patt[i];
   }
-
   for(int i = 0; i < filters.size(); i++) {
     filters[i] = PatternBF(arg_patterns, blocks);
     filters[i].add_many(items);
@@ -89,8 +91,8 @@ void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int item
  * This is represented by adding a random pattern into a random block.
  *
  */
-void FilterFramework::add_item() {
+void FilterFramework::add_items(int items) {
   for(int i = 0; i < filters.size(); i++) {
-    filters[i].add_many(1);
+    filters[i].add_many(items);
   }
 }

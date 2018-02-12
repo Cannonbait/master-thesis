@@ -10,8 +10,8 @@ cdef class PyFilterFramework:
     cdef FilterFramework ff
     def __cinit__(self,int bits, int patterns, int items, int blocks):
       self.ff = FilterFramework(bits,patterns,items,blocks)
-    def add_item(self):
-      self.ff.add_item()
+    def add_item(self,items):
+      self.ff.add_items(items)
     def test_framework(self,tests):
       return self.ff.test_framework(tests)
     def replace_patterns(self,patterns,items,blocks):
