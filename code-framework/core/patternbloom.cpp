@@ -36,7 +36,7 @@ PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_bloc
   for (int i=0; i < num_blocks; i++){
     blocks.push_back(new boost::dynamic_bitset<>((*arg_patterns[0]).size()));
   }
-  for (int i=0; i < arg_patterns.size(); i++) {
+  for (size_t i=0; i < arg_patterns.size(); i++) {
     patterns.push_back(new boost::dynamic_bitset<>(*arg_patterns[i]));
   }
 }
@@ -85,18 +85,18 @@ double PatternBF::test_rng(int num_tests){
 
 void PatternBF::print(){
   cout << endl << "Patterns" << endl << "---------------------------" << endl;
-  for (int i = 0; i < patterns.size(); i++){
+  for (size_t i = 0; i < patterns.size(); i++){
     print_pattern(patterns[i]);
   }
   cout << endl << "Blocks" << endl << "---------------------------" << endl;
-  for (int i = 0; i < blocks.size(); i++){
+  for (size_t i = 0; i < blocks.size(); i++){
     print_pattern(blocks[i]);
   }
 }
 
 void PatternBF::print_pattern(boost::dynamic_bitset<> * pattern){
   std::stringstream ss;
-  for (int i=0; i < (*pattern).size(); i++){
+  for (size_t i=0; i < (*pattern).size(); i++){
     if (i != 0){
       ss << ",";
     }

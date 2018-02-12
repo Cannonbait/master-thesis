@@ -32,7 +32,7 @@ FilterFramework::FilterFramework() {}
  */
 FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) : m(bits), n(patterns), d(items), b(blocks) {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
-  for(int i = 0; i < concurentThreadsSupported; i++) {
+  for(size_t i = 0; i < concurentThreadsSupported; i++) {
     filters.push_back(PatternBF(patterns,items,blocks,bits));
     filters[i].add_many(items);
   }
@@ -48,7 +48,7 @@ double FilterFramework::test_framework(int tests) {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   int tests_per_thread = tests/concurentThreadsSupported;
   vector< future<int> > futures;
-  for(int i = 0; i < filters.size(); i++) {
+  for(size_t i = 0; i < filters.size(); i++) {
     promise<int> p;
     futures.push_back(p.get_future());
     ts.push_back(thread(try_items, tests_per_thread, move(p), ref(filters[i])));
@@ -71,16 +71,16 @@ double FilterFramework::test_framework(int tests) {
 void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int items, int blocks) {
   vector<boost::dynamic_bitset<>*> arg_patterns(patterns.size());
   vector<boost::dynamic_bitset<> > patt(patterns.size());
-  for(int i = 0; i < patterns.size(); i++) {
+  for(size_t i = 0; i < patterns.size(); i++) {
     boost::dynamic_bitset<> bits;
     bits.clear();
     patt.push_back(bits);
-    for(int j = 0; j < patterns[0].size(); j++) {
+    for(size_t j = 0; j < patterns[0].size(); j++) {
       patt[i].push_back(patterns[i][j]);
     }
     arg_patterns[i] = &patt[i];
   }
-  for(int i = 0; i < filters.size(); i++) {
+  for(size_t i = 0; i < filters.size(); i++) {
     filters[i] = PatternBF(arg_patterns, blocks);
     filters[i].add_many(items);
   }
@@ -92,7 +92,7 @@ void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int item
  *
  */
 void FilterFramework::add_items(int items) {
-  for(int i = 0; i < filters.size(); i++) {
+  for(size_t i = 0; i < filters.size(); i++) {
     filters[i].add_many(items);
   }
 }
