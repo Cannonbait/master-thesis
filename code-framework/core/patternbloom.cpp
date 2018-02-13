@@ -14,6 +14,10 @@ using namespace std;
 
 PatternBF::PatternBF(){}
 
+/*
+ *  Standard constructor for blocked bloom filters. Initializes the patterns
+ *  with k random 1's sampled with replacement. Does not populate the filter.
+ */
 PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
   for (int i=0; i < num_blocks; i++){
     blocks.push_back(new boost::dynamic_bitset<>(num_bits));
@@ -31,6 +35,10 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
   }
 }
 
+/*
+ * Constructor for bloom filters with fixed patterns. Does not
+ * populate the filter.
+ */
 PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_blocks){
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   for (int i=0; i < num_blocks; i++){
@@ -41,6 +49,9 @@ PatternBF::PatternBF(vector<boost::dynamic_bitset<>*> arg_patterns, int num_bloc
   }
 }
 
+/*
+ *  Adds a string item to the filter.
+ */
 void PatternBF::add(string str) {
   int block_index = std::hash<string>()(str) % blocks.size();
   int pattern_index = std::hash<string>()(str)*PRIME_MULTIPLIER % patterns.size();
@@ -59,6 +70,9 @@ void PatternBF::add_many(int x) {
   }
 }
 
+/*
+ *  Tests a string item for membership in the filter.
+ */
 bool PatternBF::test(string str) {
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   int block_index = std::hash<string>()(str) % blocks.size();
@@ -66,6 +80,9 @@ bool PatternBF::test(string str) {
   return test(block_index, pattern_index);
 }
 
+/*
+ * Makes a test of a random pattern in a random block for theoretical wokloads.
+ */
 bool PatternBF::test_rng(){
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   std::uniform_int_distribution<int> dist_patt(0, patterns.size()-1);
@@ -73,6 +90,10 @@ bool PatternBF::test_rng(){
   return test(dist_blk(random_source), dist_patt(random_source));
 }
 
+/*
+ * Tests a fixed numbre of theoretical items.
+ * Returns the FPR from these tests.
+ */
 double PatternBF::test_rng(int num_tests){
   int contains = 0;
   for (int i = 0; i < num_tests; i++){
@@ -83,6 +104,9 @@ double PatternBF::test_rng(int num_tests){
   return (double)contains/(double)num_tests;
 }
 
+/*
+ *  Prints a filters blocks and patterns.
+ */
 void PatternBF::print(){
   cout << endl << "Patterns" << endl << "---------------------------" << endl;
   for (size_t i = 0; i < patterns.size(); i++){
@@ -94,6 +118,7 @@ void PatternBF::print(){
   }
 }
 
+// Helper for print()
 void PatternBF::print_pattern(boost::dynamic_bitset<> * pattern){
   std::stringstream ss;
   for (size_t i=0; i < (*pattern).size(); i++){
@@ -105,6 +130,9 @@ void PatternBF::print_pattern(boost::dynamic_bitset<> * pattern){
   cout << ss.str() << endl;
 }
 
+/*
+ * Performs a test with a fixed block and pattern.
+ */
 bool PatternBF::test(int block_index, int pattern_index){
   return ((boost::dynamic_bitset<>(*blocks[block_index]).flip()) & (*patterns[pattern_index])).none();
 }
