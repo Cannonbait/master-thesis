@@ -1,0 +1,3 @@
+Organism: Babesia Bovis
+URL: https://www.ebi.ac.uk/ena/data/view/SRS1860354
+Date: 2018-02-15
