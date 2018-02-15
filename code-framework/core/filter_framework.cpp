@@ -1,4 +1,6 @@
 #include "filter_framework.h"
+#include <iostream>
+#include <fstream>
 #include <thread>
 
 using namespace std;
@@ -92,6 +94,29 @@ void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int item
  *
  */
 void FilterFramework::add_items(int items) {
+  for(size_t i = 0; i < filters.size(); i++) {
+    filters[i].add_many(items);
+  }
+}
+
+/*
+ * Adds a single item to each filter currently active in the framework.
+ * This is represented by adding a random pattern into a random block.
+ *
+ */
+void FilterFramework::add_items_from_path(int items, string path) {
+  std::ifstream myfile("../data_preparation/" + path);
+
+  // new lines will be skipped unless we stop it from happening:
+  myfile.unsetf(std::ios_base::skipws);
+
+  // count the newlines with an algorithm specialized for counting:
+  unsigned line_count = std::count(
+    std::istreambuf_iterator<char>(myfile),
+    std::istreambuf_iterator<char>(),
+    '\n');
+
+  std::cout << "Lines: " << line_count << "\n";
   for(size_t i = 0; i < filters.size(); i++) {
     filters[i].add_many(items);
   }
