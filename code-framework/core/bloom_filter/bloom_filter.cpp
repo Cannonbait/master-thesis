@@ -10,7 +10,7 @@ using namespace std;
  * test them.
  */
 bool BloomFilter::test() {
-  seed *= 10;
+  seed *= 97;
   srand(seed);
   int v = rand();
   return test_help(v);
@@ -28,7 +28,7 @@ bool BloomFilter::test(string s) {
 bool BloomFilter::test_help(int v) {
   int val = v;
   for(int i = 0; i < k; i++) {
-    val *= primes[i];
+    val = v * primes[i];
     val = val % bits.size();
     if(bits[val] != 1) {
       return false;
@@ -42,7 +42,7 @@ bool BloomFilter::test_help(int v) {
  * with replacement.
  */
 void BloomFilter::add() {
-  seed *= 10;
+  seed *= 97;
   srand(seed);
   int v = rand();
   add_help(v);

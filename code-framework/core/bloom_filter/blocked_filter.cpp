@@ -11,9 +11,10 @@ using namespace std;
  *
  */
 bool BlockedFilter::test() {
-  seed *= 10;
+  seed *= 97;
   srand(seed);
   int v = rand();
+  v *= 7;
   v = v % filters.size();
   return filters[v].test();
 }
@@ -25,6 +26,7 @@ bool BlockedFilter::test() {
  */
 bool BlockedFilter::test_item(string s) {
   int v = tr1::hash<string>{}(s);
+  v *= 7;
   v = v % filters.size();
   return filters[v].test(s);
 }
@@ -34,9 +36,10 @@ bool BlockedFilter::test_item(string s) {
  *
  */
 void BlockedFilter::add() {
-  seed *= 10;
+  seed *= 97;
   srand(seed);
   int v = rand();
+  v *= 7;
   v = v % filters.size();
   filters[v].add();
 }
@@ -47,6 +50,7 @@ void BlockedFilter::add() {
  */
 void BlockedFilter::add_item(string s) {
   int v = tr1::hash<string>{}(s);
+  v *= 7;
   v = v % filters.size();
   filters[v].add(s);
 }
