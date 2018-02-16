@@ -20,15 +20,15 @@ class PatternBF {
     vector<boost::dynamic_bitset<>*> blocks;
     boost::mt19937 random_source;
     void print_pattern(boost::dynamic_bitset<> * pattern);
-    bool test(int block_index, int pattern_index); //object
   public:
     PatternBF();
     PatternBF(int m, int n, int num_blocks, int pattern_length);
     PatternBF(vector<boost::dynamic_bitset<>*> patterns, int num_blocks);
     void add(string str); //object
-    void add_indexes(int i_block, int i_pattern);
+    void add_indexes(int block_index, int pattern_index);
     void add_many(int x);
     bool test(string str); //object
+    bool test(int block_index, int pattern_index); //object
     bool test_rng();
     double test_rng(int num_tests);
     void print();

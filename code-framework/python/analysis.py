@@ -5,24 +5,27 @@ import matplotlib.pyplot as plt
 sys.path.append('../cython/')
 import framework
 import sys
-sys.argv[1:] = ["--source=../data-preparation/babesia-bovis/babesia_bovis.prep"]
+sys.argv[1:] = ["--source=../data-preparation/babesia-bovis/babesia_bovis_pt1.prep"]
 from mpl_toolkits.mplot3d import Axes3D
 np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
-NUM_PATTERNS = 20
-NUM_PATTERNS_START = 20
-NUM_PATTERNS_END = 30
-ITEMS_TO_STORE_START = 1
-ITEMS_TO_STORE_END = 50
-NUM_BLOCKS = 30
-NUM_BITS = 15
-NUM_TESTS = 1000
+NUM_PATTERNS = 30; ## BE CAREFUL CHANGING THIS, SHOULD BE 30
+NUM_TO_STORE = 1;
+NUM_BLOCKS = 30; ## BE CAREFUL CHANGING THIS, SHOULD BE 30
+NUM_BITS = 1;
+NUM_TESTS = 50000;
+
+
+## bits, patterns, item, blocks
 
 if any([s.startswith("--source=") for s in sys.argv]):
     fileName = [x for x in sys.argv if x.startswith("--source=")][0][9:]
-    p = framework.PyFilterFramework(NUM_PATTERNS, 17, 20, NUM_BITS)
-    p.add_items_from_path(5, fileName)
-    print(p.test_framework(5))
+    p1 = framework.PyFilterFramework(NUM_BITS, NUM_PATTERNS, NUM_TO_STORE, NUM_BLOCKS)
+    p1.add_items(NUM_TO_STORE)
+    print(p1.test_framework(NUM_TESTS))
+    p2 = framework.PyFilterFramework(NUM_BITS, NUM_PATTERNS, NUM_TO_STORE, NUM_BLOCKS)
+    p2.add_items_from_path(NUM_TO_STORE, fileName)
+    print(p2.test_framework_from_path(fileName))
     
 ##
 ##x = np.arange(NUM_PATTERNS_START, NUM_PATTERNS_END)

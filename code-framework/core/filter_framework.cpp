@@ -60,10 +60,30 @@ double FilterFramework::test_framework(int tests) {
   join_all(ts);
 
   int total_false_pos = 0;
-   for (future<int>& f : futures) {
-     total_false_pos += f.get();
-   }
+  for (future<int>& f : futures) {
+    int val = f.get();
+    total_false_pos += val;
+  }
   return (double)total_false_pos/(double)(concurentThreadsSupported*tests_per_thread);
+}
+
+double FilterFramework::test_framework_from_path(string path){
+  ifstream data_file("../data_preparation/" + path);
+  data_file.ignore(50, '\n'); //Ignore specification data
+  string line;
+  int positives = 0;
+  int totalLines = 0;
+  while (getline(data_file, line)){
+    vector<string> results;
+    boost::split(results, line, [](char c){return c == ',';});
+    if (filters[stoi(results[0])].test(stoi(results[1]), stoi(results[2]))){
+      positives++;
+      cout << positives << endl;
+    }
+    cout << totalLines << endl;
+    totalLines++;
+  }
+  return (double)positives/(double)totalLines;
 }
 
 /*
@@ -118,7 +138,7 @@ void FilterFramework::add_items_from_path(int items, string path) {
     '\n');
   std::cout << "Lines: " << line_count << "\n";
   boost::mt19937 random_source(std::chrono::system_clock::now().time_since_epoch().count());
-  boost::random::uniform_int_distribution<> pattern_dist(0, line_count-1);
+  boost::random::uniform_int_distribution<> pattern_dist(1, line_count-1);
   vector<int> indexes;
 
 
@@ -144,6 +164,5 @@ void FilterFramework::add_items_from_path(int items, string path) {
     boost::split(results, buffer, [](char c){return c == ',';});
     filters[stoi(results[0])].add_indexes(stoi(results[1]), stoi(results[2]));
   }
-  filters[0].print();
   data_file.close();
 }

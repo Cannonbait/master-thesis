@@ -18,5 +18,8 @@ cdef class PyFilterFramework:
       self.ff.add_items_from_path(items, c_path)
     def test_framework(self,tests):
       return self.ff.test_framework(tests)
+    def test_framework_from_path(self,path):
+      c_path = str.encode(path)
+      return self.ff.test_framework_from_path(c_path)
     def replace_patterns(self,patterns,items,blocks):
       self.ff.replace_patterns(patterns,items,blocks)

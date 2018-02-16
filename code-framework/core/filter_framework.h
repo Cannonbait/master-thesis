@@ -16,6 +16,7 @@ class FilterFramework {
     void add_items_from_path(int items, string path);
     void replace_patterns(vector< vector<bool> > patterns, int items, int blocks);
     double test_framework(int tests);
+    double test_framework_from_path(string path);
   private:
     int m;
     int n;

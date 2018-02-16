@@ -10,4 +10,5 @@ cdef extern from "../core/filter_framework.h":
       void add_items(int)
       void add_items_from_path(int, string)
       double test_framework(int)
+      double test_framework_from_path(string)
       void replace_patterns(vector[vector[bool]], int, int)
