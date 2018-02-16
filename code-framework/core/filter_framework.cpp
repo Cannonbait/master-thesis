@@ -1,6 +1,9 @@
 #include "filter_framework.h"
+#include <iostream>
+#include <fstream>
 #include <thread>
-
+#include <chrono>
+#include <boost/algorithm/string.hpp>
 using namespace std;
 
 // Helper for multithreading
@@ -95,4 +98,52 @@ void FilterFramework::add_items(int items) {
   for(size_t i = 0; i < filters.size(); i++) {
     filters[i].add_many(items);
   }
+}
+
+/*
+ * Adds a single item to each filter currently active in the framework.
+ * This is represented by adding a random pattern into a random block.
+ *
+ */
+void FilterFramework::add_items_from_path(int items, string path) {
+  ifstream data_file("../data_preparation/" + path);
+
+  // new lines will be skipped unless we stop it from happening:
+  data_file.unsetf(std::ios_base::skipws);
+
+  // count the newlines with an algorithm specialized for counting:
+  unsigned line_count = std::count(
+    std::istreambuf_iterator<char>(data_file),
+    std::istreambuf_iterator<char>(),
+    '\n');
+  std::cout << "Lines: " << line_count << "\n";
+  boost::mt19937 random_source(std::chrono::system_clock::now().time_since_epoch().count());
+  boost::random::uniform_int_distribution<> pattern_dist(0, line_count-1);
+  vector<int> indexes;
+
+
+  while (indexes.size() < items*filters.size()){
+    int index = pattern_dist(random_source);
+    if (find(indexes.begin(), indexes.end(), index) == indexes.end()){
+      indexes.push_back(index);
+    }
+  }
+  sort(indexes.begin(), indexes.end());
+
+  data_file.seekg(0, ios::beg);
+  data_file.setf(std::ios_base::skipws);
+  int line = 0;
+  for(int index=0; index < indexes.size(); index++){
+    while(indexes[index] != line){
+      data_file.ignore(50, '\n');
+      line++;
+    }
+    string buffer;
+    getline(data_file, buffer);
+    vector<string> results;
+    boost::split(results, buffer, [](char c){return c == ',';});
+    filters[stoi(results[0])].add_indexes(stoi(results[1]), stoi(results[2]));
+  }
+  filters[0].print();
+  data_file.close();
 }

@@ -13,6 +13,7 @@ class FilterFramework {
     FilterFramework(int bits, int patterns, int items, int blocks);
     FilterFramework();
     void add_items(int items);
+    void add_items_from_path(int items, string path);
     void replace_patterns(vector< vector<bool> > patterns, int items, int blocks);
     double test_framework(int tests);
   private:

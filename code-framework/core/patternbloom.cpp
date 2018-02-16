@@ -58,6 +58,11 @@ void PatternBF::add(string str) {
   *blocks[block_index] = (*blocks[block_index] | (*patterns[pattern_index]));
 }
 
+void PatternBF::add_indexes(int block_index, int pattern_index){
+  *blocks[block_index] = (*blocks[block_index] | (*patterns[pattern_index]));
+}
+
+
 /**
   * Add x number of patterns to the bloom filter, with random pattern and random block
 **/
