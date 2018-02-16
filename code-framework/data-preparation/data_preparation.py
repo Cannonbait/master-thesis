@@ -1,5 +1,6 @@
 import sys
-sys.argv[1:] = ["--source=Babesia-bovis/babesia_bovis_pt2", "--output=Babesia-bovis/babesia_bovis_pt2.prep", "-h1=7", "-h2=13", "-h3=17"]
+file = "babesia-bovis/babesia_bovis_raw1"
+sys.argv[1:] = ["--source="+file, "--output="+file+".prep", "threads=7", "blocks=30", "patterns=30"]
 
 
 if (len(sys.argv) < 2
@@ -40,7 +41,7 @@ fileName = [x for x in sys.argv if x.startswith("--output=")][0][9:]
 print("Writing output to: " + fileName)
 
 
-if not any([s.startswith("-h1=") for s in sys.argv]):
+if not any([s.startswith("threads=") for s in sys.argv]):
     with open(fileName, 'w+') as f:
         for genome in binary_genomes:
             f.write(genome)
@@ -49,12 +50,13 @@ if not any([s.startswith("-h1=") for s in sys.argv]):
         
 hashes = []
 
-h1 = int([x for x in sys.argv if x.startswith("-h1=")][0][4:])
-h2 = int([x for x in sys.argv if x.startswith("-h2=")][0][4:])
-h3 = int([x for x in sys.argv if x.startswith("-h3=")][0][4:])
+h1 = int([x for x in sys.argv if x.startswith("threads=")][0][8:])
+h2 = int([x for x in sys.argv if x.startswith("blocks=")][0][7:])
+h3 = int([x for x in sys.argv if x.startswith("patterns=")][0][9:])
 hashes = [[int(x, 2) % h1, int(x, 2) % h2, int(x, 2) % h3] for x in binary_genomes]
 
 with open(fileName, 'w+') as f:
+    f.write("threads: {}, blocks: {}, patterns: {} \n".format(h1, h2, h3))
     for hash_line in hashes:
         strl = ','.join(str(e) for e in hash_line)
         f.write(strl)
