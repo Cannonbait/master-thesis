@@ -58,6 +58,9 @@ void PatternBF::add(string str) {
   *blocks[block_index] = (*blocks[block_index] | (*patterns[pattern_index]));
 }
 
+/*
+ *  Adds the pattern at the specified indexes to the filter
+ */
 void PatternBF::add_indexes(int block_index, int pattern_index){
   *blocks[block_index] = (*blocks[block_index] | (*patterns[pattern_index]));
 }
