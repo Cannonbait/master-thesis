@@ -8,13 +8,13 @@ using namespace std;
 /*
  * Tests if a random element is part of
  * the set represented by the filter.
- * 
+ *
  */
 bool BlockedFilter::test() {
   seed *= 10;
   srand(seed);
   int v = rand();
-  v = v & filters.size();
+  v = v % filters.size();
   return filters[v].test();
 }
 
@@ -23,7 +23,7 @@ bool BlockedFilter::test() {
  * represented by the filter.
  *
  */
-bool BlockedFilter::test(string s) {
+bool BlockedFilter::test_item(string s) {
   int v = tr1::hash<string>{}(s);
   v = v % filters.size();
   return filters[v].test(s);
@@ -34,7 +34,7 @@ bool BlockedFilter::test(string s) {
  *
  */
 void BlockedFilter::add() {
-  seed *= 2;
+  seed *= 10;
   srand(seed);
   int v = rand();
   v = v % filters.size();
@@ -45,7 +45,7 @@ void BlockedFilter::add() {
  * Adds a string object to the filter.
  *
  */
-void BlockedFilter::add(string s) {
+void BlockedFilter::add_item(string s) {
   int v = tr1::hash<string>{}(s);
   v = v % filters.size();
   filters[v].add(s);
@@ -62,7 +62,7 @@ void BlockedFilter::add(string s) {
 BlockedFilter::BlockedFilter(int m, int b, int k, size_t s) {
   seed = s;
   for(int i = 0; i < b; i++) {
-    s *= 2;
+    s *= 13;
     BloomFilter bloom = BloomFilter(m,k,s);
     filters.push_back(bloom);
   }
@@ -76,17 +76,23 @@ BlockedFilter::BlockedFilter(int m, int b, int k, size_t s) {
  *
  */
 BlockedFilter::BlockedFilter(int m, int b, int k) {
-  seed = 1;
+  seed = time(0);
   for(int i = 0; i < b; i++) {
-    BloomFilter bloom = BloomFilter(m,k);
+    seed *= 13;
+    BloomFilter bloom = BloomFilter(m,k,seed);
     filters.push_back(bloom);
   }
 }
 
 /*
+ * Empty constructor
+ */
+BlockedFilter::BlockedFilter() {}
+
+/*
  * Prints the filter to standard output.
  */
-void BlockedFilter::print() {
+void BlockedFilter::display() {
   for(size_t i = 0; i < filters.size(); i++) {
     filters[i].print();
   }

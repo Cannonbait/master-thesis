@@ -42,14 +42,10 @@ bool BloomFilter::test_help(int v) {
  * with replacement.
  */
 void BloomFilter::add() {
-  seed *= 2;
+  seed *= 10;
   srand(seed);
   int v = rand();
   add_help(v);
-  for(int i = 0; i < bits.size(); i++) {
-    cout << bits[i];
-  }
-  cout << "\n";
 }
 
 /*
@@ -64,11 +60,10 @@ void BloomFilter::add(string s) {
 void BloomFilter::add_help(int v) {
   int val = v;
   for(int i = 0; i < k; i++) {
-    val *= primes[i];
+    val = v * primes[i];
     val = val % bits.size();
     bits[val] = 1;
   }
-  print();
 }
 
 /*
@@ -85,13 +80,13 @@ BloomFilter::BloomFilter(int m, int hashes, unsigned int s) {
  * Standard Bloom filter constructor with m bits and k hashes (up to 7).
  */
 BloomFilter::BloomFilter(int m, int hashes) {
-  seed = 1;
+  seed = time(0);
   bits = boost::dynamic_bitset<>(m);
   k = hashes;
 }
 
 void BloomFilter::print() {
-  for(int i = 0; i < bits.size(); i++) {
+  for(size_t i = 0; i < bits.size(); i++) {
     cout << bits[i];
   }
   cout << "\n";

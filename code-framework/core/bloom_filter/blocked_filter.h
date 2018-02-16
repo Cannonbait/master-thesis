@@ -6,13 +6,14 @@ using namespace std;
 
 class BlockedFilter {
   public:
-    bool test(string s);
+    bool test_item(string s);
     bool test();
-    void add(string s);
+    void add_item(string s);
     void add();
     BlockedFilter(int m, int b, int k, size_t seed);
     BlockedFilter(int m, int b, int k);
-    void print();
+    BlockedFilter();
+    void display();
   private:
     vector<BloomFilter> filters;
     size_t seed;
