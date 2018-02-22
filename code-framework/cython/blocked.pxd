@@ -13,3 +13,4 @@ cdef extern from "../core/bloom_filter/blocked_filter.h":
       void add()
       bool test()
       void display()
+      int hamming_weight()

@@ -22,14 +22,16 @@ class PatternBF {
     void print_pattern(boost::dynamic_bitset<> * pattern);
   public:
     PatternBF();
-    PatternBF(int m, int n, int num_blocks, int pattern_length);
+    PatternBF(int patterns, int items, int num_blocks, int pattern_length);
     PatternBF(vector<boost::dynamic_bitset<>*> patterns, int num_blocks);
     void add(string str); //object
+    void add_random(double level_prob, int k);
     void add_indexes(int block_index, int pattern_index);
     void add_many(int x);
     bool test(string str); //object
     bool test(int block_index, int pattern_index); //object
     bool test_rng();
+    bool test_random_pattern(double level_prob, int k);
     double test_rng(int num_tests);
     void print();
 };

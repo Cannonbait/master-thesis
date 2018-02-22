@@ -24,3 +24,5 @@ cdef class PyBlockedFilter:
       return self.bf.test()
     def display(self):
       self.bf.display()
+    def hamming_weight(self):
+      return self.bf.hamming_weight()

@@ -101,3 +101,14 @@ void BlockedFilter::display() {
     filters[i].print();
   }
 }
+
+/*
+ * Calculates the total hamming weight of all blocks
+ */
+int BlockedFilter::hamming_weight() {
+  int res = 0;
+  for(size_t i = 0; i < filters.size(); i++) {
+    res += filters[i].hamming_weight();
+  }
+  return res;
+}

@@ -26,6 +26,15 @@ void try_items(int items, promise<int> && p, PatternBF &filter) {
   p.set_value(false_positives);
 }
 
+void FilterFramework::clear_filter() {
+  filters.clear();
+  d = 1;
+  unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  for(size_t i = 0; i < concurentThreadsSupported; i++) {
+    filters.push_back(PatternBF(n,d,b,m));
+  }
+}
+
 FilterFramework::FilterFramework() {}
 
 /*
@@ -118,6 +127,7 @@ void FilterFramework::add_items(int items) {
   for(size_t i = 0; i < filters.size(); i++) {
     filters[i].add_many(items);
   }
+  d += items;
 }
 
 /*
@@ -164,5 +174,71 @@ void FilterFramework::add_items_from_path(int items, string path) {
     boost::split(results, buffer, [](char c){return c == ',';});
     filters[stoi(results[0])].add_indexes(stoi(results[1]), stoi(results[2]));
   }
+  d += items;
   data_file.close();
+}
+
+void try_genrated(int items, double level_prob, int k, promise<int> && p, PatternBF &filter) {
+  int false_positives = 0;
+  for(int j = 0; j < items; j++) {
+    if(filter.test_random_pattern(level_prob, k)) {
+      false_positives++;
+      cout << "A false positive occured" << "\n";
+    }
+  }
+  p.set_value(false_positives);
+}
+
+/*
+ * Adds a randomly constructed pattern to the filter.
+ * @param: level_prob: the probability of a pattern with level k+1
+ * @param: expected_items: the expected amount of items to be added.
+ *
+ */
+void FilterFramework::add_random(double level_prob, int k) {
+  for(size_t i = 0; i < filters.size(); i++) {
+    filters[i].add_random(level_prob, k);
+  }
+  d++;
+}
+
+/*
+ * Performs a number of tests in parallel for generated patterns.
+ * @param: tests: the number of tests to be performed.
+ * @param: level_prob: the probability that a pattern is of level k+1.
+ *
+ */
+double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
+  vector<thread> ts;
+  unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  int tests_per_thread = tests/concurentThreadsSupported;
+  vector< future<int> > futures;
+  for(size_t i = 0; i < filters.size(); i++) {
+    promise<int> p;
+    futures.push_back(p.get_future());
+    int k = round((b*m/d)*log(2));
+    ts.push_back(thread(try_genrated, level_prob, k, tests_per_thread, move(p), ref(filters[i])));
+  }
+
+  join_all(ts);
+
+  int total_false_pos = 0;
+  for (future<int>& f : futures) {
+    int val = f.get();
+    total_false_pos += val;
+  }
+  filters[0].print();
+  return (double)total_false_pos/(double)(concurentThreadsSupported*tests_per_thread);
+}
+
+int main() {
+  int d = 4;
+  double p = 0.3;
+  FilterFramework f = FilterFramework(20,1,d,1);
+  f.clear_filter();
+  for(int i = 0; i < d; i++) {
+    f.add_random(p,d);
+  }
+  cout << f.test_infinite_patterns(3, p) << "\n";
+  return 0;
 }

@@ -28,7 +28,7 @@ bool BloomFilter::test(string s) {
 bool BloomFilter::test_help(int v) {
   int val = v;
   for(int i = 0; i < k; i++) {
-    val = v * primes[i];
+    val = v * primes[i] * primes[i+1] * primes[i+2];
     val = val % bits.size();
     if(bits[val] != 1) {
       return false;
@@ -60,7 +60,7 @@ void BloomFilter::add(string s) {
 void BloomFilter::add_help(int v) {
   int val = v;
   for(int i = 0; i < k; i++) {
-    val = v * primes[i];
+    val = v * primes[i] * primes[i+1] * primes[i+2];
     val = val % bits.size();
     bits[val] = 1;
   }
@@ -90,4 +90,8 @@ void BloomFilter::print() {
     cout << bits[i];
   }
   cout << "\n";
+}
+
+int BloomFilter::hamming_weight() {
+  return bits.count();
 }

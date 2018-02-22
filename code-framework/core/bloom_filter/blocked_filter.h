@@ -14,6 +14,7 @@ class BlockedFilter {
     BlockedFilter(int m, int b, int k);
     BlockedFilter();
     void display();
+    int hamming_weight();
   private:
     vector<BloomFilter> filters;
     size_t seed;

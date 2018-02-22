@@ -7,6 +7,7 @@
 #include <sstream>
 #include <boost/dynamic_bitset.hpp>
 #include <chrono>
+#include <boost/random.hpp>
 
 
 using namespace std;
@@ -25,7 +26,7 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
   for (int i=0; i < num_patterns; i++){
     patterns.push_back(new boost::dynamic_bitset<>(num_bits));
   }
-  const int k = (num_bits/num_items_to_store)*log(2)+1;
+  const int k = (num_blocks*num_bits/num_items_to_store)*log(2)+1;
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   boost::random::uniform_int_distribution<> pattern_dist(0,num_bits-1);
   for (int i = 0; i < num_patterns; i++) {
@@ -144,3 +145,77 @@ void PatternBF::print_pattern(boost::dynamic_bitset<> * pattern){
 bool PatternBF::test(int block_index, int pattern_index){
   return ((boost::dynamic_bitset<>(*blocks[block_index]).flip()) & (*patterns[pattern_index])).none();
 }
+
+/*
+ * Shuffles the first k items of a bitset into the rest
+ * of the bitset. Timecomplexity O(k*log(m)).
+ */
+void shuffle(boost::dynamic_bitset<> &bits, int k, boost::mt19937 random_source) {
+  int m = bits.size()-1;
+  for(int i = 0; i < k; i++) {
+    uniform_int_distribution<int> dist_ind(i, m);
+    int index = dist_ind(random_source);
+    bool temp = bits[i];
+    bits[i] = bits[index];
+    bits[index] = temp;
+  }
+}
+
+/*
+ * Adds a randomly constructed pattern to the filter wth level k or k+1.
+ * Used for experiments with "infinit" amounts of patterns.
+ * @param level_prob: the probability that the pattern has level k+1
+ * @param stored_items: the number of stored items in the filter.
+ *
+ */
+void PatternBF::add_random(double level_prob, int k) {
+  random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
+  uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
+  int block_index = dist_blk(random_source);
+  // Construct the random vector
+  boost::uniform_01<boost::mt19937> zeroone(random_source);
+  if(zeroone() < level_prob) k++;
+  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(patterns[0]->size());
+  for(int i = 0; i < k; i++) {
+    b[i] = 1;
+  }
+  shuffle(b,k,random_source);
+  *blocks[block_index] = (*blocks[block_index] | b);
+}
+
+/*
+ * Tests a randomly created pattern for membership in the filter.
+ * Used for experiments with "infinit" amount of patterns.
+ * @param level_prob: the probability that the pattern has level k+1
+ * @param stored_items: the number of stored items in the filter.
+ *
+ */
+bool PatternBF::test_random_pattern(double level_prob, int k) {
+  uniform_int_distribution<int> dist_blk(0, blocks.size()-1);
+  int block_index = dist_blk(random_source);
+  // Construct the random vector
+  boost::uniform_01<boost::mt19937> zeroone(random_source);
+  if(zeroone() < level_prob) k++;
+  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(patterns[0]->size());
+  for(int i = 0; i < k; i++) {
+    b[i] = 1;
+  }
+  shuffle(b,k,random_source);
+  return ((boost::dynamic_bitset<>(*blocks[block_index]).flip()) & b).none();
+}
+
+/*int main() {
+  int count = 0;
+  for(int j = 0; j < 50; j++) {
+    PatternBF bf = PatternBF(1,4,1,20);
+    for(int i = 0; i < 4; i++) {
+        bf.add_random(0.2, 4);
+    }
+    for(int i = 0; i < 1000000; i++) {
+      if(bf.test_random_pattern(0.2, 4)) {
+        count ++;
+      }
+    }
+  }
+  cout << float(count)/50000000 << "\n";
+}*/
