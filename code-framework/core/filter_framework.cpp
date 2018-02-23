@@ -183,7 +183,6 @@ void try_genrated(int items, double level_prob, int k, promise<int> && p, Patter
   for(int j = 0; j < items; j++) {
     if(filter.test_random_pattern(level_prob, k)) {
       false_positives++;
-      cout << "A false positive occured" << "\n";
     }
   }
   p.set_value(false_positives);
@@ -217,7 +216,7 @@ double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
     promise<int> p;
     futures.push_back(p.get_future());
     int k = round((b*m/d)*log(2));
-    ts.push_back(thread(try_genrated, level_prob, k, tests_per_thread, move(p), ref(filters[i])));
+    ts.push_back(thread(try_genrated, tests_per_thread, level_prob, k, move(p), ref(filters[i])));
   }
 
   join_all(ts);
@@ -227,18 +226,5 @@ double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
     int val = f.get();
     total_false_pos += val;
   }
-  filters[0].print();
   return (double)total_false_pos/(double)(concurentThreadsSupported*tests_per_thread);
-}
-
-int main() {
-  int d = 4;
-  double p = 0.3;
-  FilterFramework f = FilterFramework(20,1,d,1);
-  f.clear_filter();
-  for(int i = 0; i < d; i++) {
-    f.add_random(p,d);
-  }
-  cout << f.test_infinite_patterns(3, p) << "\n";
-  return 0;
 }

@@ -147,7 +147,7 @@ bool PatternBF::test(int block_index, int pattern_index){
 }
 
 /*
- * Shuffles the first k items of a bitset into the rest
+ * Shuffles the first k items of a bitset with size m into the rest
  * of the bitset. Timecomplexity O(k*log(m)).
  */
 void shuffle(boost::dynamic_bitset<> &bits, int k, boost::mt19937 random_source) {
@@ -203,19 +203,3 @@ bool PatternBF::test_random_pattern(double level_prob, int k) {
   shuffle(b,k,random_source);
   return ((boost::dynamic_bitset<>(*blocks[block_index]).flip()) & b).none();
 }
-
-/*int main() {
-  int count = 0;
-  for(int j = 0; j < 50; j++) {
-    PatternBF bf = PatternBF(1,4,1,20);
-    for(int i = 0; i < 4; i++) {
-        bf.add_random(0.2, 4);
-    }
-    for(int i = 0; i < 1000000; i++) {
-      if(bf.test_random_pattern(0.2, 4)) {
-        count ++;
-      }
-    }
-  }
-  cout << float(count)/50000000 << "\n";
-}*/
