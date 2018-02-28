@@ -11,6 +11,10 @@ cdef class PyFilterFramework:
     cdef FilterFramework ff
     def __cinit__(self,int bits, int patterns, int items, int blocks):
       self.ff = FilterFramework(bits,patterns,items,blocks)
+    def __cinit__(self,int bits, int blocks):
+      self.ff = FilterFramework(bits,blocks)
+    def __cinit__(self,int bits, int blocks, int items, double level_prob, int k):
+      self.ff = FilterFramework(bits,blocks,items,level_prob,k)
     def add_items(self,items):
       self.ff.add_items(items)
     def add_random(self,level_prob,k):
@@ -25,5 +29,5 @@ cdef class PyFilterFramework:
       return self.ff.test_framework_from_path(c_path)
     def replace_patterns(self,patterns,items,blocks):
       self.ff.replace_patterns(patterns,items,blocks)
-    def test_infinite_patterns(self,tests,level_prob):
-      return self.ff.test_infinite_patterns(tests,level_prob)
+    def test_infinite_patterns(self,tests,level_prob,k):
+      return self.ff.test_infinite_patterns(tests,level_prob,k)

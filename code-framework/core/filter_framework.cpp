@@ -26,15 +26,6 @@ void try_items(int items, promise<int> && p, PatternBF &filter) {
   p.set_value(false_positives);
 }
 
-void FilterFramework::clear_filter() {
-  filters.clear();
-  d = 1;
-  unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
-  for(size_t i = 0; i < concurentThreadsSupported; i++) {
-    filters.push_back(PatternBF(n,d,b,m));
-  }
-}
-
 FilterFramework::FilterFramework() {}
 
 /*
@@ -47,6 +38,33 @@ FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) 
   for(size_t i = 0; i < concurentThreadsSupported; i++) {
     filters.push_back(PatternBF(patterns,items,blocks,bits));
     filters[i].add_many(items);
+  }
+}
+
+/*
+ * Constructor for testing "infinite" patterns.
+ * Does NOT populate the filter.
+ *
+ */
+FilterFramework::FilterFramework(int bits, int blocks) : m(bits), n(0), d(0), b(blocks) {
+  unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  for(size_t i = 0; i < concurentThreadsSupported; i++) {
+    filters.push_back(PatternBF(blocks,bits));
+  }
+}
+
+/*
+ * Constructor for testing "infinite" patterns.
+ * Populates the filter.
+ *
+ */
+FilterFramework::FilterFramework(int bits, int blocks, int items, double level_prob, int k) : m(bits), n(0), d(0), b(blocks) {
+  unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  for(size_t i = 0; i < concurentThreadsSupported; i++) {
+    filters.push_back(PatternBF(blocks,bits));
+  }
+  for(int j = 0; j < items; j++) {
+    add_random(level_prob,k);
   }
 }
 
@@ -207,7 +225,7 @@ void FilterFramework::add_random(double level_prob, int k) {
  * @param: level_prob: the probability that a pattern is of level k+1.
  *
  */
-double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
+double FilterFramework::test_infinite_patterns(int tests, double level_prob, int k) {
   vector<thread> ts;
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   int tests_per_thread = tests/concurentThreadsSupported;
@@ -215,7 +233,6 @@ double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
   for(size_t i = 0; i < filters.size(); i++) {
     promise<int> p;
     futures.push_back(p.get_future());
-    int k = round((b*m/d)*log(2));
     ts.push_back(thread(try_genrated, tests_per_thread, level_prob, k, move(p), ref(filters[i])));
   }
 
@@ -228,3 +245,18 @@ double FilterFramework::test_infinite_patterns(int tests, double level_prob) {
   }
   return (double)total_false_pos/(double)(concurentThreadsSupported*tests_per_thread);
 }
+
+/*int main() {
+  double p = 0.3;
+  int m = 512;
+  int b = 1;
+  int d = 60;
+  int k = round((512/d)*log(2));
+  FilterFramework ff = FilterFramework(m,b);
+  for(int i = 0; i < 60; i++) {
+    ff.add_random(p,k);
+  }
+  FilterFramework ff = FilterFramework(m,b,d,p,k);
+  cout << "Res: " << ff.test_infinite_patterns(3000000,p,k) << "\n";
+  return 0;
+}*/

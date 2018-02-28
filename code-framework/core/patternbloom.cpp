@@ -37,6 +37,17 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
 }
 
 /*
+ * Constructor for blocked filter without patterns. Used for testing
+ * "infinite" distributions.
+ *
+ */
+PatternBF::PatternBF(int num_blocks, int num_bits) {
+  for (int i=0; i < num_blocks; i++){
+    blocks.push_back(new boost::dynamic_bitset<>(num_bits));
+  }
+}
+
+/*
  * Constructor for bloom filters with fixed patterns. Does not
  * populate the filter.
  */
@@ -175,7 +186,7 @@ void PatternBF::add_random(double level_prob, int k) {
   // Construct the random vector
   boost::uniform_01<boost::mt19937> zeroone(random_source);
   if(zeroone() < level_prob) k++;
-  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(patterns[0]->size());
+  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(blocks[0]->size());
   for(int i = 0; i < k; i++) {
     b[i] = 1;
   }
@@ -196,7 +207,7 @@ bool PatternBF::test_random_pattern(double level_prob, int k) {
   // Construct the random vector
   boost::uniform_01<boost::mt19937> zeroone(random_source);
   if(zeroone() < level_prob) k++;
-  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(patterns[0]->size());
+  boost::dynamic_bitset<> b = boost::dynamic_bitset<>(blocks[0]->size());
   for(int i = 0; i < k; i++) {
     b[i] = 1;
   }

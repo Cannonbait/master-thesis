@@ -24,6 +24,7 @@ class PatternBF {
     PatternBF();
     PatternBF(int patterns, int items, int num_blocks, int pattern_length);
     PatternBF(vector<boost::dynamic_bitset<>*> patterns, int num_blocks);
+    PatternBF(int num_blocks, int num_bits);
     void add(string str); //object
     void add_random(double level_prob, int k);
     void add_indexes(int block_index, int pattern_index);

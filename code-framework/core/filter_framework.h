@@ -11,15 +11,16 @@ using namespace std;
 class FilterFramework {
   public:
     FilterFramework(int bits, int patterns, int items, int blocks);
+    FilterFramework(int bits, int blocks);
+    FilterFramework(int bits, int blocks, int items, double level_prob, int k);
     FilterFramework();
     void add_items(int items);
     void add_random(double level_prob, int k);
     void add_items_from_path(int items, string path);
     void replace_patterns(vector< vector<bool> > patterns, int items, int blocks);
     double test_framework(int tests);
-    double test_infinite_patterns(int tests, double level_prob);
+    double test_infinite_patterns(int tests, double level_prob, int k);
     double test_framework_from_path(string path);
-    void clear_filter();
   private:
     int m; // Number of Bits
     int n; // Number of patterns
