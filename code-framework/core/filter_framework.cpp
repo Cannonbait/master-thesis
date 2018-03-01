@@ -100,17 +100,19 @@ double FilterFramework::test_framework_from_path(string path){
   string line;
   int positives = 0;
   int totalLines = 0;
+  int entered = 0;
   while (getline(data_file, line)){
     vector<string> results;
     boost::split(results, line, [](char c){return c == ',';});
     if (filters[stoi(results[0])].test(stoi(results[1]), stoi(results[2]))){
       positives++;
-      cout << positives << endl;
     }
-    cout << totalLines << endl;
+    if (find(entries.begin(), entries.end(), line) != entries.end()){
+      entered++;
+    }
     totalLines++;
   }
-  return (double)positives/(double)totalLines;
+  return (double)positives/(double)totalLines - (double)entered/(double)totalLines;
 }
 
 /*
@@ -119,19 +121,16 @@ double FilterFramework::test_framework_from_path(string path){
  *
  */
 void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int items, int blocks) {
-  vector<boost::dynamic_bitset<>*> arg_patterns(patterns.size());
-  vector<boost::dynamic_bitset<> > patt(patterns.size());
+  vector<boost::dynamic_bitset<>*> dyn_patterns(patterns.size());
   for(size_t i = 0; i < patterns.size(); i++) {
-    boost::dynamic_bitset<> bits;
-    bits.clear();
-    patt.push_back(bits);
-    for(size_t j = 0; j < patterns[0].size(); j++) {
-      patt[i].push_back(patterns[i][j]);
+    boost::dynamic_bitset<>* bits = new boost::dynamic_bitset<>(patterns[0].size());
+    for(size_t j = 0; j < patterns[0].size(); j++){
+      (*bits)[j] = patterns[i][j];
     }
-    arg_patterns[i] = &patt[i];
+    dyn_patterns[i] = bits;
   }
   for(size_t i = 0; i < filters.size(); i++) {
-    filters[i] = PatternBF(arg_patterns, blocks);
+    filters[i] = PatternBF(dyn_patterns, blocks);
     filters[i].add_many(items);
   }
 }
@@ -177,7 +176,6 @@ void FilterFramework::add_items_from_path(int items, string path) {
     }
   }
   sort(indexes.begin(), indexes.end());
-
   data_file.seekg(0, ios::beg);
   data_file.setf(std::ios_base::skipws);
   int line = 0;
@@ -188,6 +186,7 @@ void FilterFramework::add_items_from_path(int items, string path) {
     }
     string buffer;
     getline(data_file, buffer);
+    entries.push_back(buffer);
     vector<string> results;
     boost::split(results, buffer, [](char c){return c == ',';});
     filters[stoi(results[0])].add_indexes(stoi(results[1]), stoi(results[2]));

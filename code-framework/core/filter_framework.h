@@ -27,4 +27,5 @@ class FilterFramework {
     int b; // Number of blocks
     int d; // Number of stored items
     vector<PatternBF> filters;
+    vector<string> entries;
 };
