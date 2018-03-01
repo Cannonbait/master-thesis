@@ -22,6 +22,7 @@ def comp(m,n,d,b):
 # Pattern design from Cache- Hash-efficient Bloom filters
 def che(m,n,d,b):
     k = int(round(b*m/d*math.log(2)))
+    k = max(k, 1)
     patterns = np.zeros((n,m))
     for j in range(n):
         for i in range(k):
