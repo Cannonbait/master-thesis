@@ -1,66 +1,127 @@
 import sys
+sys.path.append('../cython/')
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-sys.path.append('../cython/')
 import framework
-import sys
 import pattern_designs
-## sys.argv[1:] = ["--source=../data-preparation/babesia-bovis/babesia_bovis_raw1.prep"]
 from mpl_toolkits.mplot3d import Axes3D
-from progress.bar import Bar
-np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
-
-NUM_BITS = 512;
-NUM_TESTS = 1000;
-NUM_BLOCKS = 10
-## bits, patterns, item, blocks
+sys.argv[1:] = ["-source=aaa", "-m=520", "-m_end=523", "-n=700", "-d=100", "-b=30"]
 
 
-if any([s.startswith("--source=") for s in sys.argv]):
-    NUM_PATTERNS = 30; ## BE CAREFUL CHANGING THIS, SHOULD BE 30
-    NUM_TO_STORE = 40;
-    NUM_BLOCKS = 30; ## BE CAREFUL CHANGING THIS, SHOULD BE 30
-    p1 = framework.PyFilterFramework(NUM_BITS, NUM_PATTERNS, NUM_TO_STORE, NUM_BLOCKS)
-    p1.add_items(NUM_TO_STORE)
-    print(p1.test_framework(NUM_TESTS))
-    p2 = framework.PyFilterFramework(NUM_BITS, NUM_PATTERNS, NUM_TO_STORE, NUM_BLOCKS)
-    p2.add_items_from_path(NUM_TO_STORE, fileName)
-    print(p2.test_framework_from_path(fileName))
+######################## PARSE ARGUMENTS
+def default_arguments():
+    arguments = {"m": 512, "n": 800, "d": 200, "b":30}
+    arguments["tests"] = 1000
+    arguments["pattern_trials"] = 5
+    return arguments
+
+def extract_argument(argv, symbol):
+    if any([s.startswith("-{0}=".format(symbol)) for s in argv]):
+        return int([x for x in sys.argv if x.startswith("-{0}=".format(symbol))][0][len(symbol)+2:])
+    elif symbol in default_arguments():
+        return default_arguments()[symbol]
+    else:
+        return
+
+class Analysis_Settings:
+    def __init__(self, argv):
+        self.trial_ranges = {}
+        range_symbols = ["m", "n", "d", "b"]
+        for symbol in range_symbols:
+            self.trial_ranges[symbol] = [extract_argument(argv, symbol)]
+            end = extract_argument(argv, symbol+"_end")
+            if end != None:
+                self.trial_ranges[symbol].append(end)
+
+        self.tests = extract_argument(argv, "tests")
+        self.pattern_trials = extract_argument(argv, "pattern_trials")
+
+        if any([s.startswith("-source=") for s in argv]):
+            self.source = [x for x in sys.argv if x.startswith("-source=")][0][len("-source="):]
+        else:
+            print("Found no \"source\" argument, trials will be run with random input")
+            self.source = None
+
+
+
+######################## GENERATE DATA 
+def generate_dimensions(settings):
+    dimensions = []
+    for key in settings.trial_ranges:
+        if len(settings.trial_ranges[key]) == 2:
+            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1])))
+    return dimensions
+
+def run_trial(trial_parameters, num_pattern_trials, num_framework_tests):
+    average = 0.0
+    for trial in range(0, num_pattern_trials):
+        bits = trial_parameters["m"]
+        patterns = trial_parameters["n"]
+        stored = trial_parameters["d"]
+        blocks = trial_parameters["b"]
+        f = framework.PyFilterFramework(bits, patterns, stored, blocks)
+        f.replace_patterns(pattern_designs.comp(bits, patterns, stored, blocks), stored, blocks)
+        f.add_items(stored)
+        average = average + f.test_framework(num_framework_tests)
+    return average / num_pattern_trials
+                
+def generate_data(settings):
+    dimensions = generate_dimensions(settings)
+    parameters = {}
+    # Set the parameter for all values that are fix (i.e. not a range)
+    for key in settings.trial_ranges:
+        if len(settings.trial_ranges[key]) == 1:
+            parameters[key] = settings.trial_ranges[key][0]
+
+    # If we have no ranges
+    if len(dimensions) == 0:
+        print("No ranges not implemented")
+        sys.exit(0)
+    elif len(dimensions) == 1:
+        fpr = np.zeros(dimensions[0][1].size)
+        for ix, x in enumerate(dimensions[0][1]):
+            trial_parameters = parameters.copy()
+            trial_parameters[dimensions[0][0]] = x
+            fpr[ix] = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
+        return fpr
     
-else:
-    NUM_PATTERNS_START = 650
-    NUM_PATTERNS_END = 720
-    NUM_STORED_START = 20
-    NUM_STORED_END = 40
-    NUM_BLOCKS = 10
-    STEP_SIZE = 10
-    PATTERN_TRIALS = 1
-    
-    x = np.arange(NUM_PATTERNS_START, NUM_PATTERNS_END, STEP_SIZE)
-    y = np.arange(NUM_STORED_START, NUM_STORED_END, STEP_SIZE)
-    comp = np.zeros([y.size, x.size])
-    che = np.zeros([y.size, x.size])
+    else:
+        fpr = np.zeros([dimensions[0][1].size, dimensions[1][1].size])
+        for ix, x in enumerate(dimensions[0][1]):
+            for iy, y in enumerate(dimensions[1][1]):
+                trial_parameters = parameters.copy()
+                trial_parameters[dimensions[0][0]] = x
+                trial_parameters[dimensions[1][0]] = y
+                fpr[ix][iy] = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
+            
+        return fpr
 
-    bar = Bar('Processing', max=x.size)
-    for ix, num_patterns in enumerate(x):
-        values = []
-        for iy, num_to_store in enumerate(y):
-            for trial in range(0, PATTERN_TRIALS):
-                f = framework.PyFilterFramework(NUM_BITS, num_patterns, num_to_store, NUM_BLOCKS)
-                f.replace_patterns(pattern_designs.comp(NUM_BITS, num_patterns, num_to_store, NUM_BLOCKS), num_to_store, NUM_BLOCKS)
-                f.add_items(num_to_store)
-                comp[iy][ix] = comp[iy][ix] + f.test_framework(NUM_TESTS)
-                f.replace_patterns(pattern_designs.che(NUM_BITS, num_patterns, num_to_store, NUM_BLOCKS), num_to_store, NUM_BLOCKS)
-                f.add_items(num_to_store)
-                che[iy][ix] = che[iy][ix] + f.test_framework(NUM_TESTS)
-            comp[iy][ix] = comp[iy][ix] / PATTERN_TRIALS
-            che[iy][ix] = che[iy][ix] / PATTERN_TRIALS
-        bar.next()
-    bar.finish()
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    x, y = np.meshgrid(x, y)
-    ax.plot_surface(x,y,comp)
-    ax.plot_surface(x,y,che)
-    plt.show()
+
+
+######################## DISPLAY DATA
+
+def display_data(result, dimensions):
+    if len(dimensions) == 1:
+        fig, ax = plt.subplots()
+        x = dimensions[0][1]
+        ax.plot(x,result)
+        plt.xlabel(dimensions[0][0])
+        plt.show()    
+    else:
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        x, y = np.meshgrid(dimensions[1][1], dimensions[0][1])
+        ax.plot_surface(x,y,result)
+        plt.xlabel(dimensions[1][0])
+        plt.ylabel(dimensions[0][0])
+        plt.show()    
+
+        
+settings = Analysis_Settings(sys.argv)
+
+result = generate_data(settings)
+display_data(result, generate_dimensions(settings))
+
+
