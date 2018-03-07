@@ -7,7 +7,7 @@ import numpy as np
 import framework
 import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
-sys.argv[1:] = ["-source=aaa", "-m=512", "-n=5000", "-n_end=5010", "-d=100", "-d_end=103", "-b=30"]
+sys.argv[1:] = ["-source=aaa", "-m=512", "-n=10", "-d=100", "-d_end=103", "-b=30"]
 
 
 ######################## PARSE ARGUMENTS

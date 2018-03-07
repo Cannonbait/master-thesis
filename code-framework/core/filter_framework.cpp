@@ -36,7 +36,7 @@ FilterFramework::FilterFramework() {}
 FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) : m(bits), n(patterns), d(items), b(blocks) {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   for(size_t i = 0; i < concurentThreadsSupported; i++) {
-    filters.push_back(PatternBF(patterns,items,blocks,bits));
+    filters.push_back(PatternBF(blocks,bits));
   }
 }
 
