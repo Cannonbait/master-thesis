@@ -7,7 +7,7 @@ import numpy as np
 import framework
 import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
-sys.argv[1:] = ["-source=aaa", "-m=520", "-m_end=523", "-n=700", "-d=100", "-b=30"]
+sys.argv[1:] = ["-source=aaa", "-m=512", "-n=5000", "-n_end=5010", "-d=100", "-d_end=103", "-b=30"]
 
 
 ######################## PARSE ARGUMENTS
@@ -62,7 +62,7 @@ def run_trial(trial_parameters, num_pattern_trials, num_framework_tests):
         stored = trial_parameters["d"]
         blocks = trial_parameters["b"]
         f = framework.PyFilterFramework(bits, patterns, stored, blocks)
-        f.replace_patterns(pattern_designs.comp(bits, patterns, stored, blocks), stored, blocks)
+        f.replace_patterns(pattern_designs.comp(bits, patterns, stored, blocks), blocks)
         f.add_items(stored)
         average = average + f.test_framework(num_framework_tests)
     return average / num_pattern_trials

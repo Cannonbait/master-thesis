@@ -17,7 +17,7 @@ class FilterFramework {
     void add_items(int items);
     void add_random(double level_prob, int k);
     void add_items_from_path(int items, string path);
-    void replace_patterns(vector< vector<bool> > patterns, int items, int blocks);
+    void replace_patterns(vector< vector<bool> > patterns, int blocks);
     double test_framework(int tests);
     double test_infinite_patterns(int tests, double level_prob, int k);
     double test_framework_from_path(string path);

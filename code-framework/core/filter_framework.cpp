@@ -37,7 +37,6 @@ FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) 
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
   for(size_t i = 0; i < concurentThreadsSupported; i++) {
     filters.push_back(PatternBF(patterns,items,blocks,bits));
-    filters[i].add_many(items);
   }
 }
 
@@ -130,7 +129,7 @@ double FilterFramework::test_framework_from_path(string path){
  * a new number of items needs to be added.
  *
  */
-void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int items, int blocks) {
+void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int blocks) {
   vector<boost::dynamic_bitset<>*> dyn_patterns(patterns.size());
   for(size_t i = 0; i < patterns.size(); i++) {
     boost::dynamic_bitset<>* bits = new boost::dynamic_bitset<>(patterns[0].size());
@@ -141,7 +140,6 @@ void FilterFramework::replace_patterns(vector< vector<bool> > patterns, int item
   }
   for(size_t i = 0; i < filters.size(); i++) {
     filters[i] = PatternBF(dyn_patterns, blocks);
-    filters[i].add_many(items);
   }
 }
 

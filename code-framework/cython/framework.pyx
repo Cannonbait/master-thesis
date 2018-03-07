@@ -27,7 +27,7 @@ cdef class PyFilterFramework:
     def test_framework_from_path(self,path):
       c_path = str.encode(path)
       return self.ff.test_framework_from_path(c_path)
-    def replace_patterns(self,patterns,items,blocks):
-      self.ff.replace_patterns(patterns,items,blocks)
+    def replace_patterns(self,patterns,blocks):
+      self.ff.replace_patterns(patterns,blocks)
     def test_infinite_patterns(self,tests,level_prob,k):
       return self.ff.test_infinite_patterns(tests,level_prob,k)

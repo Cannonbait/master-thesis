@@ -15,4 +15,4 @@ cdef extern from "../core/filter_framework.h":
       double test_framework(int)
       double test_framework_from_path(string)
       double test_infinite_patterns(int, double, int);
-      void replace_patterns(vector[vector[bool]], int, int)
+      void replace_patterns(vector[vector[bool]], int)
