@@ -11,10 +11,10 @@ cdef class PyFilterFramework:
     cdef FilterFramework ff
     def __cinit__(self,int bits, int patterns, int items, int blocks):
       self.ff = FilterFramework(bits,patterns,items,blocks)
-    def __cinit__(self,int bits, int blocks):
-      self.ff = FilterFramework(bits,blocks)
-    def __cinit__(self,int bits, int blocks, int items, double level_prob, int k):
-      self.ff = FilterFramework(bits,blocks,items,level_prob,k)
+    def infinite_framework(self,int bits, int blocks):
+      self.ff.infinite_framework(bits,blocks)
+    def infinite_framework_pop(self,int bits, int blocks, int items, double level_prob, int k):
+      self.ff.infinite_framework_pop(bits,blocks,items,level_prob,k)
     def add_items(self,items):
       self.ff.add_items(items)
     def add_random(self,level_prob,k):

@@ -7,8 +7,8 @@ cdef extern from "../core/filter_framework.h":
     cdef cppclass FilterFramework:
       FilterFramework() except +
       FilterFramework(int, int, int, int) except +
-      FilterFramework(int, int) except +
-      FilterFramework(int, int, int, double, int) except +
+      void infinite_framework(int, int)
+      void infinite_framework_pop(int, int, int, double, int)
       void add_items(int)
       void add_random(double, int)
       void add_items_from_path(int, string)
