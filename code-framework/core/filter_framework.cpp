@@ -42,24 +42,34 @@ FilterFramework::FilterFramework(int bits, int patterns, int items, int blocks) 
 }
 
 /*
- * Constructor for testing "infinite" patterns.
+ * Helper constructor for testing "infinite" patterns.
  * Does NOT populate the filter.
  *
  */
-FilterFramework::FilterFramework(int bits, int blocks) : m(bits), n(0), d(0), b(blocks) {
+void FilterFramework::infinite_framework(int bits, int blocks) {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  filters.clear();
+  m = bits;
+  n = 0;
+  d = 0;
+  b = blocks;
   for(size_t i = 0; i < concurentThreadsSupported; i++) {
     filters.push_back(PatternBF(blocks,bits));
   }
 }
 
 /*
- * Constructor for testing "infinite" patterns.
+ * Helper constructor for testing "infinite" patterns.
  * Populates the filter.
  *
  */
-FilterFramework::FilterFramework(int bits, int blocks, int items, double level_prob, int k) : m(bits), n(0), d(0), b(blocks) {
+void FilterFramework::infinite_framework_pop(int bits, int blocks, int items, double level_prob, int k)  {
   unsigned concurentThreadsSupported = thread::hardware_concurrency()-1;
+  filters.clear();
+  m = bits;
+  n = 0;
+  d = 0;
+  b = blocks;
   for(size_t i = 0; i < concurentThreadsSupported; i++) {
     filters.push_back(PatternBF(blocks,bits));
   }

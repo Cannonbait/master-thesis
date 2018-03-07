@@ -11,8 +11,8 @@ using namespace std;
 class FilterFramework {
   public:
     FilterFramework(int bits, int patterns, int items, int blocks);
-    FilterFramework(int bits, int blocks);
-    FilterFramework(int bits, int blocks, int items, double level_prob, int k);
+    void infinite_framework(int bits, int blocks);
+    void infinite_framework_pop(int bits, int blocks, int items, double level_prob, int k);
     FilterFramework();
     void add_items(int items);
     void add_random(double level_prob, int k);
