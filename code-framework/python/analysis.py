@@ -8,8 +8,8 @@ import framework
 import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
 from pattern_interface import IPatternGenerator
-from comp_pattern import COMP, CHE
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=105", "-b=1"]
+import comp_pattern
+sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=105", "-b=1", "-che", "-comp"]
 
 
 ######################## PARSE ARGUMENTS
@@ -46,6 +46,15 @@ class Analysis_Settings:
             print("Found no \"source\" argument, trials will be run with random input")
             self.source = None
 
+        self.pattern_designs = []
+        if any([s.startswith("-che") for s in argv]):
+            self.pattern_designs.append(comp_pattern.CHE)
+        if any([s.startswith("-comp") for s in argv]):
+            self.pattern_designs.append(comp_pattern.COMP)
+        if len(self.pattern_designs) == 0:
+            print("No pattern designs flagged")
+            sys.exit(0)
+
 ######################## GENERATE DATA
 def generate_dimensions(settings):
     dimensions = []
@@ -54,26 +63,26 @@ def generate_dimensions(settings):
             dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1])))
     return dimensions
 
-def run_trial(trial_parameters, num_pattern_trials, num_framework_tests, generator_list):
-    average = [0.0]*len(generator_list)
+def run_trial(trial_parameters, settings):
+    average = [0.0]*len(settings.pattern_designs)
     bits = trial_parameters["m"]
     patterns = trial_parameters["n"]
     stored = trial_parameters["d"]
     blocks = trial_parameters["b"]
     f = framework.PyFilterFramework(bits, patterns, stored, blocks)
-    for index, generator in enumerate(generator_list):
+    for index, generator in enumerate(settings.pattern_designs):
         av_val = 0.0
-        for trial in range(0, num_pattern_trials):
+        for trial in range(0, settings.pattern_trials):
             print("d: ", stored, "trial: ", trial)
             f.replace_patterns(generator.generate_patterns(bits, patterns, stored, blocks), blocks)
             f.add_items(stored)
-            av_val = av_val + f.test_framework(num_framework_tests)
-        average[index] = av_val / num_pattern_trials
+            av_val = av_val + f.test_framework(settings.tests)
+        average[index] = av_val / settings.pattern_trials
     return average
 
-def generate_data(settings, generator_list):
+def generate_data(settings):
     # Check that each pattern generator is an instance of the interface
-    if not all([issubclass(gen, IPatternGenerator) for gen in generator_list]):
+    if not all([issubclass(gen, IPatternGenerator) for gen in settings.pattern_designs]):
         raise ValueError('One or more generators does not implement the IPatternGenerator interface.')
 
     dimensions = generate_dimensions(settings)
@@ -87,11 +96,11 @@ def generate_data(settings, generator_list):
         print("No ranges not implemented")
         sys.exit(0)
     elif len(dimensions) == 1:
-        fpr = np.zeros((dimensions[0][1].size,len(generator_list)))
+        fpr = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)))
         trial_parameters = parameters.copy()
         for ix, x in enumerate(dimensions[0][1]):
             trial_parameters[dimensions[0][0]] = x
-            fpr[ix,:] = run_trial(trial_parameters, settings.pattern_trials, settings.tests, generator_list)
+            fpr[ix,:] = run_trial(trial_parameters, settings)
         return fpr
 
     else:
@@ -101,12 +110,12 @@ def generate_data(settings, generator_list):
             for iy, y in enumerate(dimensions[1][1]):
                 trial_parameters[dimensions[0][0]] = x
                 trial_parameters[dimensions[1][0]] = y
-                fpr[ix][iy] = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
+                fpr[ix][iy] = run_trial(trial_parameters, settings)
         return fpr
 
 ######################## DISPLAY DATA
 
-def display_data(result, setting, designs):
+def display_data(result, settings):
     dimensions = generate_dimensions(settings)
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
@@ -114,7 +123,7 @@ def display_data(result, setting, designs):
         ax.plot(x,result)
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
-        plt.legend([p_design.get_name() for p_design in designs])
+        plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
         plt.title("False positive rate as a funtion of " + dimensions[0][0])
         plt.show()
     else:
@@ -126,7 +135,6 @@ def display_data(result, setting, designs):
         plt.ylabel(dimensions[0][0])
         plt.show()
 
-designs = [COMP, CHE]
 settings = Analysis_Settings(sys.argv)
-result = generate_data(settings, designs)
-display_data(result, settings, designs)
+result = generate_data(settings)
+display_data(result, settings)
