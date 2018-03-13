@@ -1,21 +1,24 @@
 from abc import ABCMeta, abstractmethod
-from numpy import matrix
+import numpy as np
 
-class IPattern(object):
+# Interface for the pattern generators
+class IPatternGenerator(object):
     __metaclass__ = ABCMeta
 
     #------------------------------------------------
     # m = bits     (rows)
     # n = patterns (columns)
     # d = items    (defectives)
+    # b = blocks   (for item normalization)
     #------------------------------------------------
-    def __init__(self,m,n,d):
-        pass
+    @abstractmethod
+    def generate_patterns(self,m,n,d,b):
+        return np.zeros((n,m), dtype='bool')
 
     #-------------------------------------------------
-    # Should return the patterns as a mxn numpy matrix
+    # Should return the name of the pattern
+    # generator algorithm. Used for plot label.
     #-------------------------------------------------
-    @property
     @abstractmethod
-    def patterns(self):
-        pass
+    def get_name():
+        return "Undefined"
