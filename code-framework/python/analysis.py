@@ -5,18 +5,19 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import framework
+import math
 import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
 from pattern_interface import IPatternGenerator
 from comp_pattern import COMP, CHE
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=105", "-b=1"]
+sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=110", "-b=1"]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
     arguments = {"m": 512, "n": 800, "d": 200, "b":30}
-    arguments["tests"] = 1000
-    arguments["pattern_trials"] = 2
+    arguments["tests"] = 90000
+    arguments["pattern_trials"] = 5
     return arguments
 
 def extract_argument(argv, symbol):
@@ -55,7 +56,9 @@ def generate_dimensions(settings):
     return dimensions
 
 def run_trial(trial_parameters, num_pattern_trials, num_framework_tests, generator_list):
+    """Returns an average value and its standard deviation for every generator"""
     average = [0.0]*len(generator_list)
+    std = [0.0]*len(generator_list)
     bits = trial_parameters["m"]
     patterns = trial_parameters["n"]
     stored = trial_parameters["d"]
@@ -63,15 +66,28 @@ def run_trial(trial_parameters, num_pattern_trials, num_framework_tests, generat
     f = framework.PyFilterFramework(bits, patterns, stored, blocks)
     for index, generator in enumerate(generator_list):
         av_val = 0.0
+        std_val = [0.0]*num_pattern_trials
         for trial in range(0, num_pattern_trials):
             print("d: ", stored, "trial: ", trial)
             f.replace_patterns(generator.generate_patterns(bits, patterns, stored, blocks), blocks)
             f.add_items(stored)
-            av_val = av_val + f.test_framework(num_framework_tests)
+            result = f.test_framework(num_framework_tests)
+            av_val = av_val + result
+            std_val[trial] = result
         average[index] = av_val / num_pattern_trials
-    return average
+        # Calculate the standard deviation
+        total = 0.0
+        for value in std_val:
+            total = total + pow(value-average[index],2)
+        if(num_pattern_trials > 1):
+            std[index] = math.sqrt(total/(num_pattern_trials-1))
+        else:
+            std[index] = math.sqrt(total)
+    return (average, std)
 
 def generate_data(settings, generator_list):
+    """Generates an average value and std for each design over the specified range(s)"""
+
     # Check that each pattern generator is an instance of the interface
     if not all([issubclass(gen, IPatternGenerator) for gen in generator_list]):
         raise ValueError('One or more generators does not implement the IPatternGenerator interface.')
@@ -88,30 +104,37 @@ def generate_data(settings, generator_list):
         sys.exit(0)
     elif len(dimensions) == 1:
         fpr = np.zeros((dimensions[0][1].size,len(generator_list)))
+        std = np.zeros((dimensions[0][1].size,len(generator_list)))
         trial_parameters = parameters.copy()
         for ix, x in enumerate(dimensions[0][1]):
             trial_parameters[dimensions[0][0]] = x
-            fpr[ix,:] = run_trial(trial_parameters, settings.pattern_trials, settings.tests, generator_list)
-        return fpr
+            (average, standard) = run_trial(trial_parameters, settings.pattern_trials, settings.tests, generator_list)
+            fpr[ix,:] = average
+            std[ix,:] = standard
+        print(std)
+        return (fpr,std)
 
     else:
         fpr = np.zeros([dimensions[0][1].size, dimensions[1][1].size])
+        std = np.zeros((dimensions[0][1].size,len(generator_list)))
         trial_parameters = parameters.copy()
         for ix, x in enumerate(dimensions[0][1]):
             for iy, y in enumerate(dimensions[1][1]):
                 trial_parameters[dimensions[0][0]] = x
                 trial_parameters[dimensions[1][0]] = y
                 fpr[ix][iy] = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
-        return fpr
+        return (fpr,std)
 
 ######################## DISPLAY DATA
 
 def display_data(result, setting, designs):
+    (average,std) = result
     dimensions = generate_dimensions(settings)
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
         x = dimensions[0][1]
-        ax.plot(x,result)
+        for i in range(average[0,:].size):
+            ax.errorbar(x,average[:,i],std[:,i], marker="*", mew=3, elinewidth=1)
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
         plt.legend([p_design.get_name() for p_design in designs])
