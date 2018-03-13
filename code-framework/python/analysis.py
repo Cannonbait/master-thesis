@@ -10,7 +10,7 @@ import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
 from pattern_interface import IPatternGenerator
 import comp_pattern
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=105", "-b=1", "-che", "-comp"]
+sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=120", "-b=1", "-che", "-comp"]
 
 
 ######################## PARSE ARGUMENTS
@@ -77,7 +77,6 @@ def run_trial(trial_parameters, settings):
         av_val = 0.0
         std_val = [0.0]*settings.pattern_trials
         for trial in range(0, settings.pattern_trials):
-            print("d: ", stored, "trial: ", trial)
             f.replace_patterns(generator.generate_patterns(bits, patterns, stored, blocks), blocks)
             f.add_items(stored)
             result = f.test_framework(settings.tests)
@@ -94,12 +93,18 @@ def run_trial(trial_parameters, settings):
             std[index] = math.sqrt(total)
     return (average, std)
 
+def progbar(curr, total, full_progbar):
+    frac = curr/total
+    filled_progbar = round(frac*full_progbar)
+    print('\r', '#'*filled_progbar + '-'*(full_progbar-filled_progbar), '[{:>7.2%}]'.format(frac), end='')
+
 def generate_data(settings):
     """Generates an average value and std for each design over the specified range(s)"""
     # Check that each pattern generator is an instance of the interface
     if not all([issubclass(gen, IPatternGenerator) for gen in settings.pattern_designs]):
         raise ValueError('One or more generators does not implement the IPatternGenerator interface.')
 
+    print("Generating data...")
     dimensions = generate_dimensions(settings)
     parameters = {}
     # Set the parameter for all values that are fix (i.e. not a range)
@@ -114,11 +119,15 @@ def generate_data(settings):
         fpr = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)))
         std = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)))
         trial_parameters = parameters.copy()
+        counter = 0
         for ix, x in enumerate(dimensions[0][1]):
             trial_parameters[dimensions[0][0]] = x
             (average, standard) = run_trial(trial_parameters, settings)
             fpr[ix,:] = average
             std[ix,:] = standard
+            counter = counter + 1
+            progbar(counter, dimensions[0][1].size, 20)
+        print("Done")
         return (fpr,std)
 
     else:
@@ -135,7 +144,6 @@ def generate_data(settings):
 ######################## DISPLAY DATA
 def display_data(result, settings):
     (average,std) = result
-    print(average, ":", std)
     dimensions = generate_dimensions(settings)
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
