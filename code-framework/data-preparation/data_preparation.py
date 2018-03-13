@@ -44,7 +44,7 @@ print("Writing output to: " + fileName)
 if not any([s.startswith("threads=") for s in sys.argv]):
     with open(fileName, 'w+') as f:
         for genome in binary_genomes:
-            f.write(genome)
+            f.write(str(int(genome,2)))
             f.write('\n')
     sys.exit()
         
