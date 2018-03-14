@@ -8,16 +8,17 @@ import framework
 import math
 import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
+from multiprocessing import Pool
 from pattern_interface import IPatternGenerator
 import comp_pattern
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=143", "-b=1", "-che", "-comp"]
+#sys.argv[1:] = ["-m=501", "-n=6996", "-d=1", "-d_end=110", "-b=1", "-che", "-crs", "-comp"]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
     arguments = {"m": 512, "n": 800, "d": 200, "b":1}
     arguments["tests"] = 90000
-    arguments["pattern_trials"] = 3
+    arguments["pattern_trials"] = 2
     return arguments
 
 def extract_argument(argv, symbol):
@@ -52,6 +53,8 @@ class Analysis_Settings:
             self.pattern_designs.append(comp_pattern.CHE)
         if any([s.startswith("-comp") for s in argv]):
             self.pattern_designs.append(comp_pattern.COMP)
+        if any([s.startswith("-crs") for s in argv]):
+            self.pattern_designs.append(comp_pattern.CRS)
         if len(self.pattern_designs) == 0:
             print("No pattern designs flagged")
             sys.exit(0)
@@ -92,8 +95,8 @@ def run_trial(trial_parameters, settings):
         else:
             std[index] = math.sqrt(total)
 
-    k_val = math.log(2)*bits/(stored/blocks)
-    bloom_val = (1-2.72**(-k_val*(stored/blocks)/bits))**k_val
+    k_val = round(math.log(2)*bits/(stored/blocks))
+    bloom_val = (1/blocks)*(1-np.exp(-k_val*(stored/blocks)/bits))**k_val
     average[len(settings.pattern_designs)] = bloom_val
     return (average, std)
 
@@ -108,7 +111,6 @@ def generate_data(settings):
     if not all([issubclass(gen, IPatternGenerator) for gen in settings.pattern_designs]):
         raise ValueError('One or more generators does not implement the IPatternGenerator interface.')
 
-    print("Generating data...")
     dimensions = generate_dimensions(settings)
     parameters = {}
     # Set the parameter for all values that are fix (i.e. not a range)
@@ -120,6 +122,7 @@ def generate_data(settings):
         print("No ranges not implemented")
         sys.exit(0)
     elif len(dimensions) == 1:
+        print("Generating data...")
         fpr = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)+1))
         std = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)+1))
         trial_parameters = parameters.copy()
@@ -143,7 +146,9 @@ def generate_data(settings):
             for iy, y in enumerate(dimensions[1][1]):
                 trial_parameters[dimensions[0][0]] = x
                 trial_parameters[dimensions[1][0]] = y
-                fpr[ix][iy] = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
+                (average, standard) = run_trial(trial_parameters, settings.pattern_trials, settings.tests)
+                fpr[ix][iy] = average
+                std[ix][iy] = standard
         return (fpr,std)
 
 ######################## DISPLAY DATA
@@ -153,12 +158,15 @@ def display_data(result, settings):
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
         x = dimensions[0][1]
-        for i in range(average[0,:].size):
+        for i in range(average[0,:].size-1):
             ax.errorbar(x,average[:,i],std[:,i], marker="*", mew=3, elinewidth=1)
+        index = average[0,:].size-1
+        ax.errorbar(x,average[:,index],std[:,index], mew=3) # The blocked Bloom filter
+        ax.set_ylabel(r'Value [x 10^{-10}]')
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
         legends = [p_design.get_name() for p_design in settings.pattern_designs]
-        legends.append('Bloom filter')
+        legends.append('Blocked Bloom filter, Eq. (2)')
         plt.legend(legends)
         plt.title("False positive rate as a funtion of " + dimensions[0][0])
         plt.show()
