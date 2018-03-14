@@ -10,14 +10,14 @@ import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
 from pattern_interface import IPatternGenerator
 import comp_pattern
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=120", "-b=1", "-che", "-comp"]
+sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=143", "-b=1", "-che", "-comp"]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
     arguments = {"m": 512, "n": 800, "d": 200, "b":1}
     arguments["tests"] = 90000
-    arguments["pattern_trials"] = 5
+    arguments["pattern_trials"] = 3
     return arguments
 
 def extract_argument(argv, symbol):
@@ -66,8 +66,8 @@ def generate_dimensions(settings):
 
 def run_trial(trial_parameters, settings):
     """Returns an average value and its standard deviation for every generator"""
-    average = [0.0]*len(settings.pattern_designs)
-    std = [0.0]*len(settings.pattern_designs)
+    average = [0.0]*(len(settings.pattern_designs)+1)
+    std = [0.0]*(len(settings.pattern_designs)+1)
     bits = trial_parameters["m"]
     patterns = trial_parameters["n"]
     stored = trial_parameters["d"]
@@ -91,6 +91,10 @@ def run_trial(trial_parameters, settings):
             std[index] = math.sqrt(total/(settings.pattern_trials-1))
         else:
             std[index] = math.sqrt(total)
+
+    k_val = math.log(2)*bits/(stored/blocks)
+    bloom_val = (1-2.72**(-k_val*(stored/blocks)/bits))**k_val
+    average[len(settings.pattern_designs)] = bloom_val
     return (average, std)
 
 def progbar(curr, total, full_progbar):
@@ -116,18 +120,19 @@ def generate_data(settings):
         print("No ranges not implemented")
         sys.exit(0)
     elif len(dimensions) == 1:
-        fpr = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)))
-        std = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)))
+        fpr = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)+1))
+        std = np.zeros((dimensions[0][1].size,len(settings.pattern_designs)+1))
         trial_parameters = parameters.copy()
         counter = 0
+        progbar(0, dimensions[0][1].size, 40)
         for ix, x in enumerate(dimensions[0][1]):
             trial_parameters[dimensions[0][0]] = x
             (average, standard) = run_trial(trial_parameters, settings)
             fpr[ix,:] = average
             std[ix,:] = standard
             counter = counter + 1
-            progbar(counter, dimensions[0][1].size, 20)
-        print("Done")
+            progbar(counter, dimensions[0][1].size, 40)
+        print("\nDone.")
         return (fpr,std)
 
     else:
@@ -152,7 +157,9 @@ def display_data(result, settings):
             ax.errorbar(x,average[:,i],std[:,i], marker="*", mew=3, elinewidth=1)
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
-        plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
+        legends = [p_design.get_name() for p_design in settings.pattern_designs]
+        legends.append('Bloom filter')
+        plt.legend(legends)
         plt.title("False positive rate as a funtion of " + dimensions[0][0])
         plt.show()
     else:
