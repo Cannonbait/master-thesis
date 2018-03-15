@@ -146,5 +146,5 @@ venv.bak/
 
 # End of https://www.gitignore.io/api/c++,python,codeblocks
 /code-framework/data-preparation/babesia-bovis/*
-
+/code-framework/cython/*.cpp
 
