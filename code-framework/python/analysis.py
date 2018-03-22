@@ -19,6 +19,7 @@ def default_arguments():
     arguments = {"m": 512, "n": 800, "d": 200, "b":30}
     arguments["tests"] = 1000
     arguments["pattern_trials"] = 2
+    arguments["step_size"] = 2
     return arguments
 
 def extract_argument(argv, symbol):
@@ -41,6 +42,7 @@ class Analysis_Settings:
 
         self.tests = extract_argument(argv, "tests")
         self.pattern_trials = extract_argument(argv, "pattern_trials")
+        self.step_size = extract_argument(argv, "step_size")
 
         if any([s.startswith("-path=") for s in argv]):
             self.path = [x for x in sys.argv if x.startswith("-source=")][0][len("-source="):]
@@ -62,7 +64,7 @@ def generate_dimensions(settings):
     dimensions = []
     for key in settings.trial_ranges:
         if len(settings.trial_ranges[key]) == 2:
-            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1])))
+            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.step_size)))
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
