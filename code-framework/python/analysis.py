@@ -12,7 +12,9 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-sys.argv[1:] = ["-m=512", "-n=4096", "-d=2000", "-d_end=2010", "-b=23", "-che", "-comp", "-crs", "-step_size=1", "-pattern_trials=10", "-tests=100000"]
+from pattern_interface import IPatternGenerator
+import comp_pattern
+sys.argv[1:] = ["-m=512", "-n=4096", "-d=120", "-d_end=200", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=10", "-tests=10000"]
 
 
 ######################## PARSE ARGUMENTS
@@ -71,10 +73,12 @@ def generate_dimensions(settings):
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
-    matrix = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)])
+    values    = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)])
+    deviation = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)])
     for result in results:
-        matrix[result[0]][:] = result[1]
-    return matrix
+        values[result[0]][:] = result[1]
+        deviation[result[0]][:] = result[2]
+    return (values, deviation)
 
 def generate_data(settings):
     # Check that each pattern generator is an instance of the interface
@@ -97,13 +101,13 @@ def generate_data(settings):
         for ix, x in enumerate(dimensions[0][1]):
             parameters[dimensions[0][0]] = x
             trials.append((ix, parameters.copy()))
-        
+
         return(convert_to_matrix(controller.test(trials, settings), dimensions, settings))
 
     else:
         fpr = np.zeros([dimensions[0][1].size, dimensions[1][1].size])
         trial_parameters = parameters.copy()
-        
+
         for ix, x in enumerate(dimensions[0][1]):
             for iy, y in enumerate(dimensions[1][1]):
                 trial_parameters[dimensions[0][0]] = x
@@ -113,12 +117,13 @@ def generate_data(settings):
 
 ######################## DISPLAY DATA
 
-def display_data(result, settings):
+def display_data(result, deviation, settings):
     dimensions = generate_dimensions(settings)
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
         x = dimensions[0][1]
-        ax.plot(x,result)
+        for i in range((result.shape)[1]):
+            ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o')
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
         plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
@@ -135,5 +140,5 @@ def display_data(result, settings):
 
 if __name__ == '__main__':
     settings = Analysis_Settings(sys.argv)
-    result = generate_data(settings)
-    display_data(result, settings)
+    (result, deviation) = generate_data(settings)
+    display_data(result, deviation, settings)
