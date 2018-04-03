@@ -4,14 +4,15 @@ sys.path.append('../cython/')
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import framework
 import serial_framework
 import worker_pool
-import pattern_designs
+from pattern_design.pattern_interface import IPatternGenerator
+from pattern_design.che import CHE
+from pattern_design.comp import COMP
+from pattern_design.identity import IDENTITY
+from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-from pattern_interface import IPatternGenerator
-import comp_pattern
-sys.argv[1:] = ["-m=512", "-n=4096", "-d=2000", "-d_end=4000", "-b=23", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=10", "-tests=100000"]
+sys.argv[1:] = ["-m=512", "-n=4096", "-d=2000", "-d_end=2010", "-b=23", "-che", "-comp", "-crs", "-step_size=1", "-pattern_trials=10", "-tests=100000"]
 
 
 ######################## PARSE ARGUMENTS
@@ -52,11 +53,11 @@ class Analysis_Settings:
 
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
-            self.pattern_designs.append(comp_pattern.CHE)
+            self.pattern_designs.append(CHE)
         if any([s.startswith("-comp") for s in argv]):
-            self.pattern_designs.append(comp_pattern.COMP)
+            self.pattern_designs.append(COMP)
         if any([s.startswith("-crs") for s in argv]):
-            self.pattern_designs.append(comp_pattern.CRS)
+            self.pattern_designs.append(CRS)
         if len(self.pattern_designs) == 0:
             print("No pattern designs flagged")
             sys.exit(0)

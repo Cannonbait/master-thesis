@@ -3,7 +3,6 @@ sys.path.append("../cython/")
 import serial_framework
 import multiprocessing
 import time
-import comp_pattern
 
 class Consumer(multiprocessing.Process):
 
