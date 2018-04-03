@@ -15,4 +15,4 @@ cdef class PySerialFramework:
       c_path = str.encode(path)
       self.sf = SerialFramework(c_path)
     def test(self, patterns, bits, store, blocks, tests):
-      return self.sf.test(patterns, bits, store, blocks, tests)
+      return self.sf.test(patterns.transpose(), bits, store, blocks, tests)
