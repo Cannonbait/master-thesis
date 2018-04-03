@@ -11,7 +11,7 @@ import pattern_designs
 from mpl_toolkits.mplot3d import Axes3D
 from pattern_interface import IPatternGenerator
 import comp_pattern
-sys.argv[1:] = ["-m=509", "-n=1000", "-d=100", "-d_end=120", "-b=1", "-che", "-comp"]
+sys.argv[1:] = ["-m=512", "-n=4096", "-d=2000", "-d_end=4000", "-b=23", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=10", "-tests=100000"]
 
 
 ######################## PARSE ARGUMENTS
@@ -55,6 +55,8 @@ class Analysis_Settings:
             self.pattern_designs.append(comp_pattern.CHE)
         if any([s.startswith("-comp") for s in argv]):
             self.pattern_designs.append(comp_pattern.COMP)
+        if any([s.startswith("-crs") for s in argv]):
+            self.pattern_designs.append(comp_pattern.CRS)
         if len(self.pattern_designs) == 0:
             print("No pattern designs flagged")
             sys.exit(0)
