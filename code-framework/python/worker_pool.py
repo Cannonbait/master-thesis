@@ -4,7 +4,6 @@ import serial_framework
 import multiprocessing
 import time
 import numpy as np
-import comp_pattern
 
 # Definition for progressbar.
 def progbar(curr, total, full_progbar):

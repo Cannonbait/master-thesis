@@ -35,15 +35,13 @@ class CRS(IPatternGenerator):
             primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61]
 
         patterns = np.zeros((m,n))
-        current_index = 0
-        for p in primes:
-            for x in range(p):
-                for i in range(n):
-                    if(x == (i % p)):
-                        patterns[current_index][i] = 1
-                current_index += 1
+        for i in range(n):
+            current_index = 0
+            for p in primes:
+                index = (i % p) + current_index
+                patterns[index][i] = 1
+                current_index += p
         return patterns
 
     def get_name():
         return "CRS"
-
