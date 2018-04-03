@@ -62,7 +62,7 @@ class Controller:
         self.results_queue = multiprocessing.Queue()
 
         # Start consumers
-        self.num_consumers = multiprocessing.cpu_count() * 1
+        self.num_consumers = multiprocessing.cpu_count() - 1
         print('Creating {} worker threads'.format(self.num_consumers))
         
         self.consumers = [
