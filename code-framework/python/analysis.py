@@ -12,17 +12,15 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-from pattern_interface import IPatternGenerator
-import comp_pattern
-sys.argv[1:] = ["-m=512", "-n=4096", "-d=120", "-d_end=200", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=10", "-tests=10000"]
+sys.argv[1:] = ["-d=200", "-d_end=205", "-che", "-comp", "-crs" "]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
-    arguments = {"m": 512, "n": 800, "d": 200, "b":30}
+    arguments = {"m": 512, "n": 4096, "d": 200, "b":23}
     arguments["tests"] = 1000
     arguments["pattern_trials"] = 2
-    arguments["step_size"] = 2
+    arguments["step_size"] = 1
     return arguments
 
 def extract_argument(argv, symbol):
