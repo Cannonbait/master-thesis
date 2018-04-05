@@ -149,11 +149,14 @@ def display_data(result, deviation, settings):
         plt.show()
 
 if __name__ == '__main__':
+    print("Loading parameters")
     settings = Analysis_Settings(sys.argv)
+    print("Generating data")
     (result, deviation) = generate_data(settings)
     if (settings.display):
         display_data(result, deviation, settings)
     if (settings.output != None):
+        print("Saving data to " + settings.output)
         with open(settings.output, 'w', newline='') as file:
             writer = csv.writer(file, delimiter=" ", quotechar='|', quoting=csv.QUOTE_MINIMAL)
             writer.writerow(result)
