@@ -12,7 +12,7 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-sys.argv[1:] = ["-d=200", "-d_end=205", "-che", "-comp", "-crs" "]
+sys.argv[1:] = ["-d=200", "-d_end=205", "-che", "-comp", "-crs"]
 
 
 ######################## PARSE ARGUMENTS
