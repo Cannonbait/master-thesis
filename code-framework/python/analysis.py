@@ -6,23 +6,22 @@ import pandas as pd
 import numpy as np
 import serial_framework
 import worker_pool
+import csv
 from pattern_design.pattern_interface import IPatternGenerator
 from pattern_design.che import CHE
 from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-from pattern_interface import IPatternGenerator
-import comp_pattern
-sys.argv[1:] = ["-m=512", "-n=4096", "-d=120", "-d_end=200", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=10", "-tests=10000"]
+sys.argv[1:] = ["-d=200", "-d_end=205", "-che", "-comp", "-crs", "-output=output.log"]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
-    arguments = {"m": 512, "n": 800, "d": 200, "b":30}
+    arguments = {"m": 512, "n": 4096, "d": 200, "b":23}
     arguments["tests"] = 1000
     arguments["pattern_trials"] = 2
-    arguments["step_size"] = 2
+    arguments["step_size"] = 1
     return arguments
 
 def extract_argument(argv, symbol):
@@ -47,12 +46,23 @@ class Analysis_Settings:
         self.pattern_trials = extract_argument(argv, "pattern_trials")
         self.step_size = extract_argument(argv, "step_size")
 
+        if any([s.startswith("--display") for s in argv]):
+            self.display = True
+        else:
+            self.display = False
+
         if any([s.startswith("-path=") for s in argv]):
             self.path = [x for x in sys.argv if x.startswith("-source=")][0][len("-source="):]
         else:
             print("Found no \"source\" argument, trials will be run with random input")
             self.path = None
 
+        if any([s.startswith("-output=") for s in argv]):
+            self.output = [x for x in sys.argv if x.startswith("-output=")][0][len("-output="):]
+        else:
+            print("No output file designated")
+            self.output = None
+            
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
             self.pattern_designs.append(CHE)
@@ -139,6 +149,15 @@ def display_data(result, deviation, settings):
         plt.show()
 
 if __name__ == '__main__':
+    print("Loading parameters")
     settings = Analysis_Settings(sys.argv)
+    print("Generating data")
     (result, deviation) = generate_data(settings)
-    display_data(result, deviation, settings)
+    if (settings.display):
+        display_data(result, deviation, settings)
+    if (settings.output != None):
+        print("Saving data to " + settings.output)
+        with open(settings.output, 'w', newline='') as file:
+            writer = csv.writer(file, delimiter=" ", quotechar='|', quoting=csv.QUOTE_MINIMAL)
+            writer.writerow(result)
+            writer.writerow(deviation)
