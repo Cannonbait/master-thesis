@@ -6,22 +6,22 @@ import pandas as pd
 import numpy as np
 import serial_framework
 import worker_pool
-import csv
 from pattern_design.pattern_interface import IPatternGenerator
 from pattern_design.che import CHE
 from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-sys.argv[1:] = ["-d=200", "-d_end=205", "-che", "-comp", "-crs", "-output=output.log"]
+#sys.argv[1:] = ["-source='../data-preparation/out.prep'", "-m=512", "-n=1500", "-d=120", "-d_end=160", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=1", "-tests=10000"]
 
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
-    arguments = {"m": 512, "n": 4096, "d": 200, "b":23}
-    arguments["tests"] = 1000
-    arguments["pattern_trials"] = 2
-    arguments["step_size"] = 1
+    arguments = { "m": 512, "n": 4096, "d": 120, "d_end": 180, "b": 1 }
+    arguments["tests"] = 10000
+    arguments["pattern_trials"] = 5
+    arguments["step_size"] = 10
+    arguments["compare"] = False
     return arguments
 
 def extract_argument(argv, symbol):
@@ -46,23 +46,16 @@ class Analysis_Settings:
         self.pattern_trials = extract_argument(argv, "pattern_trials")
         self.step_size = extract_argument(argv, "step_size")
 
-        if any([s.startswith("--display") for s in argv]):
-            self.display = True
-        else:
-            self.display = False
-
-        if any([s.startswith("-path=") for s in argv]):
+        if any([s.startswith("-source=") for s in argv]):
             self.path = [x for x in sys.argv if x.startswith("-source=")][0][len("-source="):]
+            print("Using data from ", self.path)
         else:
             print("Found no \"source\" argument, trials will be run with random input")
             self.path = None
 
-        if any([s.startswith("-output=") for s in argv]):
-            self.output = [x for x in sys.argv if x.startswith("-output=")][0][len("-output="):]
-        else:
-            print("No output file designated")
-            self.output = None
-            
+        if any([s.startswith("-compare=") for s in argv]):
+            self.compare = [x for x in sys.argv if x.startswith("-compare=")][0][len("-compare="):]
+
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
             self.pattern_designs.append(CHE)
@@ -83,8 +76,12 @@ def generate_dimensions(settings):
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
-    values    = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)])
-    deviation = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)])
+    if settings.compare:
+        mult = 2
+    else:
+        mult = 1
+    values    = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)*mult])
+    deviation = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)*mult])
     for result in results:
         values[result[0]][:] = result[1]
         deviation[result[0]][:] = result[2]
@@ -132,11 +129,23 @@ def display_data(result, deviation, settings):
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
         x = dimensions[0][1]
-        for i in range((result.shape)[1]):
-            ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o')
+        if settings.compare:
+            line_colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
+            for i in range(0,(result.shape)[1],2):
+                ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o',c=line_colors[i//2])
+                ax.errorbar(x,result[:,i+1],deviation[:,i+1],fmt='s--',c=line_colors[i//2])
+            labels = []
+            for p_design in settings.pattern_designs:
+                labels.append('Empirical '   + p_design.get_name())
+                labels.append('Theoretical ' + p_design.get_name())
+            plt.legend(labels)
+        else:
+            for i in range((result.shape)[1]):
+                ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o')
+            plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
+
         plt.xlabel(dimensions[0][0])
         plt.ylabel("FPR")
-        plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
         plt.title("False positive rate as a funtion of " + dimensions[0][0])
         plt.show()
     else:
@@ -149,15 +158,6 @@ def display_data(result, deviation, settings):
         plt.show()
 
 if __name__ == '__main__':
-    print("Loading parameters")
     settings = Analysis_Settings(sys.argv)
-    print("Generating data")
     (result, deviation) = generate_data(settings)
-    if (settings.display):
-        display_data(result, deviation, settings)
-    if (settings.output != None):
-        print("Saving data to " + settings.output)
-        with open(settings.output, 'w', newline='') as file:
-            writer = csv.writer(file, delimiter=" ", quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            writer.writerow(result)
-            writer.writerow(deviation)
+    display_data(result, deviation, settings)

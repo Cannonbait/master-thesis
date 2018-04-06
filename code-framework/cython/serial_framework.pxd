@@ -8,3 +8,4 @@ cdef extern from "../core/serial_framework.h":
       SerialFramework() except +
       SerialFramework(string) except +
       double test(vector[vector[bool]], int, int, int, int)
+      double test_no_path(vector[vector[bool]], int, int, int, int)

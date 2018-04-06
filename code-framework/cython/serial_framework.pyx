@@ -16,3 +16,5 @@ cdef class PySerialFramework:
       self.sf = SerialFramework(c_path)
     def test(self, patterns, bits, store, blocks, tests):
       return self.sf.test(patterns.transpose(), bits, store, blocks, tests)
+    def test_no_path(self, patterns, bits, store, blocks, tests):
+      return self.sf.test_no_path(patterns.transpose(), bits, store, blocks, tests)

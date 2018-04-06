@@ -23,6 +23,13 @@ SerialFramework::SerialFramework(string path) {
   }
 }
 
+double SerialFramework::test_no_path(vector<vector<bool>> patterns,
+          int bits, int store, int blocks, int tests) {
+    PatternBF bf(convert_patterns(patterns), blocks);
+    bf.add_many(store);
+    return bf.test_rng(tests);
+}
+
 double SerialFramework::test(vector<vector<bool>> patterns,
           int bits, int store, int blocks, int tests){
   //Create pattern
@@ -32,18 +39,20 @@ double SerialFramework::test(vector<vector<bool>> patterns,
     return bf.test_rng(tests);
   } else {
     //Store data
-    mpz_t block_size, patterns_size, value, block_i, pattern_i;
+    mpz_t value, block_i, pattern_i;
     mpz_init(value);
     mpz_init(block_i);
     mpz_init(pattern_i);
-
+    int multiplier = 47;
     int i1, i2, universe, storage_index;
     universe = source.size()-1;
     std::uniform_int_distribution<int> dist_blk(0, universe);
+    
     for(int i = 0; i < store; i++) {
       storage_index = dist_blk(random_source) % universe;
       stored.push_back(source[storage_index]);
       mpz_set_str(value, source[storage_index].c_str(), 10);
+      mpz_mul_ui(value, value, multiplier);
       // Should possibly be changed to random lines
       mpz_mod_ui(block_i, value, blocks);
       mpz_mod_ui(pattern_i, value, patterns.size());
@@ -56,12 +65,13 @@ double SerialFramework::test(vector<vector<bool>> patterns,
     for(int i = store; i < (store+tests); i++) {
       storage_index = dist_blk(random_source) % universe;
       mpz_set_str(value, source[storage_index].c_str(), 10);
+      mpz_mul_ui(value, value, multiplier);
       mpz_mod_ui(block_i, value, blocks);
       mpz_mod_ui(pattern_i, value, patterns.size());
       i1 = mpz_get_ui(block_i);
       i2 = mpz_get_ui(pattern_i);
 
-      // The element is a true positive and should not be logged for FPR
+      // The element is a true positive and should not be logged for FPR if it is contained
       if (!(find(stored.begin(), stored.end(), source[i]) != stored.end())) {
         if (bf.test(i1,i2)) {
           contained++;

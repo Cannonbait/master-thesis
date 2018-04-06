@@ -24,7 +24,8 @@ class Consumer(multiprocessing.Process):
     def run(self):
         proc_name = self.name
         if(self.path != None):
-          framework = serial_framework.PySerialFramework(self.path)
+          framework = serial_framework.PySerialFramework()
+          framework.with_path(self.path)
         else:
           framework = serial_framework.PySerialFramework()
         while True:
@@ -39,20 +40,29 @@ class Consumer(multiprocessing.Process):
             deviation = []
             for i, pattern_generator in enumerate(next_task.pattern_generators):
                 temp_val = []
+                temp_second = []
                 for trial in range(0, next_task.pattern_trials):
                     temp_val.append(framework.test(next_task.get_patterns(pattern_generator),
                     next_task.bits, next_task.store, next_task.blocks,
                     next_task.tests))
+                    if next_task.compare:
+                        temp_second.append(framework.test_no_path(next_task.get_patterns(pattern_generator),
+                        next_task.bits, next_task.store, next_task.blocks,
+                        next_task.tests))
                 average = sum(temp_val)/next_task.pattern_trials
                 vals.append(average)
                 deviation.append(np.std(temp_val))
+                if next_task.compare:
+                    average = sum(temp_second)/next_task.pattern_trials
+                    vals.append(average)
+                    deviation.append(np.std(temp_second))
             self.task_queue.task_done()
             self.result_queue.put((next_task.indexes, vals, deviation))
 
 
 class Task:
 
-    def __init__(self, indexes, pattern_generators, bits, num_patterns, store, blocks, tests, pattern_trials, total):
+    def __init__(self, indexes, pattern_generators, bits, num_patterns, store, blocks, tests, pattern_trials, total, compare):
         self.indexes = indexes
         self.pattern_generators = pattern_generators
         self.bits = bits
@@ -62,6 +72,7 @@ class Task:
         self.tests = tests
         self.pattern_trials = pattern_trials
         self.total = total
+        self.compare = compare
 
     def get_patterns(self, generator):
       return generator.generate_patterns(self.bits, self.num_patterns, self.store, self.blocks)
@@ -90,7 +101,7 @@ class Controller:
         for trial in trials:
             self.tasks.put(Task(trial[0], settings.pattern_designs, trial[1]['m'],
             trial[1]['n'], trial[1]['d'],trial[1]['b'], settings.tests,
-            settings.pattern_trials, len(trials)))
+            settings.pattern_trials, len(trials), settings.compare))
 
         # Add a poison pill for each consumer
         for i in range(self.num_consumers):
