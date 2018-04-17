@@ -12,7 +12,7 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-#sys.argv[1:] = ["-source='../data-preparation/out.prep'", "-m=512", "-n=1500", "-d=120", "-d_end=160", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=1", "-tests=10000"]
+sys.argv[1:] = ["-m=512", "-n=1500", "-d=120", "-d_end=160", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=1", "-tests=10000"]
 
 
 ######################## PARSE ARGUMENTS
@@ -21,7 +21,6 @@ def default_arguments():
     arguments["tests"] = 10000
     arguments["pattern_trials"] = 5
     arguments["step_size"] = 10
-    arguments["compare"] = False
     return arguments
 
 def extract_argument(argv, symbol):
@@ -53,8 +52,10 @@ class Analysis_Settings:
             print("Found no \"source\" argument, trials will be run with random input")
             self.path = None
 
-        if any([s.startswith("-compare=") for s in argv]):
-            self.compare = [x for x in sys.argv if x.startswith("-compare=")][0][len("-compare="):]
+        if any([s.startswith("-compare") for s in argv]):
+            self.compare = True
+        else:
+        	self.compare = False
 
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
