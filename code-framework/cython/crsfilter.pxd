@@ -3,7 +3,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-cdef extern from "../core/crs_filter/crs_filter.h":
+cdef extern from "../core/runtime_filters/crs_filter.h":
     cdef cppclass CRSFilter:
       CRSFilter() except +
       CRSFilter(int,int,int) except +

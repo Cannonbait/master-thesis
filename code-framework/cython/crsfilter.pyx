@@ -1,5 +1,5 @@
 # distutils: language = c++
-# distutils: sources = ../core/crs_filter/crs_filter.cpp
+# distutils: sources = ../core/runtime_filters/crs_filter.cpp
 
 from crsfilter cimport CRSFilter
 
