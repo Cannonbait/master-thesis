@@ -49,6 +49,7 @@ Found no "source" argument, trials will be run with random input
 Initializing filters...
 
 ```
+<<<<<<< f72d6d2bfd46dfe10d6c8c6ed2843d6f798a63e9
 This will run a quick demo comparing the CHE (Cache- Hash- efficent) and COMP (Combinatorial Orthogonal Matching Pursuit) algorithms as pattern designs for some default parameters. The execution time can vary from machine to machine depending on the cachesize. This should in the end display a graph looking something like this:
 
 ![Framework demo](https://github.com/Cannonbait/master-thesis/blob/master/readme_img.png)
@@ -78,3 +79,9 @@ Initializing filters...
 
 # Generating new pattern designs
 
+=======
+apt-get install libboost-dev python3-pip python3 python3-numpy python3-tk lib3gmp3-dev
+pip3 install cython matplotlib pandas
+
+´´´
+>>>>>>> Updated readme
