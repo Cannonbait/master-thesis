@@ -13,3 +13,5 @@ cdef class PyCRSFilter:
       return self.filt.try_random()
     def add_random(self):
       return self.filt.add_random()
+    def measure_performance(self):
+      return self.filt.measure_performance()

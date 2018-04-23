@@ -3,7 +3,7 @@ from libcpp cimport bool
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
-cdef extern from "../core/lcg_filter/lcg_filter.h":
+cdef extern from "../core/runtime_filters/lcg_filter.h":
     cdef cppclass LCGFilter:
       LCGFilter() except +
       LCGFilter(int,int,int) except +
@@ -11,3 +11,4 @@ cdef extern from "../core/lcg_filter/lcg_filter.h":
       bool try_random()
       void add_random()
       void change_lcg(long,long,long)
+      double measure_performance()

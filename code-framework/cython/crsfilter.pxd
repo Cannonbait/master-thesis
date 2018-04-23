@@ -10,3 +10,4 @@ cdef extern from "../core/runtime_filters/crs_filter.h":
       unsigned int size()
       bool try_random()
       void add_random()
+      double measure_performance()

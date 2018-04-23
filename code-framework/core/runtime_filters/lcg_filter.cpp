@@ -22,7 +22,7 @@ LCGFilter::LCGFilter(unsigned int num_bits, unsigned int num_blocks, unsigned in
   for (unsigned int i = 0; i < num_blocks; i++) {
     blocks.push_back(new boost::dynamic_bitset<>(num_bits));
   }
-  k = log(2)*num_blocks*num_bits/items;
+  k = round(log(2)*num_blocks*num_bits/items);
 }
 
 // Internal helper for constructing a LCP-pattern.
@@ -38,57 +38,6 @@ boost::dynamic_bitset<> LCGFilter::generate_pattern(unsigned long seed_value) {
   }
 
   return pattern;
-}
-
-/*
- * Checks if the supplied item is contained in teh filter.
- * @param item: the item to check for membership
- * @requires: the type T of the item must be hashable.
- */
-template <class T> bool LCGFilter::elem(T item) {
-  unsigned long value = hash<T>()(item);
-  unsigned int block = value % blocks.size();
-  boost::dynamic_bitset<> pattern = generate_pattern(value);
-  return ((boost::dynamic_bitset<>(*blocks[block]).flip()) & pattern).none();
-}
-
-/*
- * Inserts an item into the filter.
- * @param item: the item to be inserted.
- * @requires: the type T of the item must be hashable.
- */
-template <class T> void LCGFilter::insert(T item) {
-  unsigned long value = hash<T>()(item);
-  unsigned int block = value % blocks.size();
-  boost::dynamic_bitset<> pattern = generate_pattern(value);
-  *blocks[block] = (*blocks[block]) | pattern;
-}
-
-/*
- * Tries a randomly generated pattern against the filter.
- */
-bool LCGFilter::try_random() {
-  srand(std::chrono::system_clock::now().time_since_epoch().count());
-  boost::dynamic_bitset<> pattern = generate_pattern(rand());
-  unsigned int block = rand() % blocks.size();
-  return ((boost::dynamic_bitset<>(*blocks[block]).flip()) & pattern).none();
-}
-
-/*
- * Adds a randomly constructed pattern to the filter.
- */
-void LCGFilter::add_random() {
-  srand(std::chrono::system_clock::now().time_since_epoch().count());
-  boost::dynamic_bitset<> pattern = generate_pattern(rand());
-  unsigned int block = rand() % blocks.size();
-  *blocks[block] = (*blocks[block]) | pattern;
-}
-
-/*
- * Returns the size of the filter.
- */
-unsigned int LCGFilter::size() {
-  return (blocks[0]->size())*blocks.size();
 }
 
 /*

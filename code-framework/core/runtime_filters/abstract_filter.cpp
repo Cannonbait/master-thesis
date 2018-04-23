@@ -1,6 +1,7 @@
 #include "abstract_filter.h"
 #include <chrono>
 #include <math.h>
+#include <ctime>
 
 /*
  * Checks if the supplied item is contained in the filter.
@@ -44,6 +45,22 @@ void AbstractFilter::add_random() {
   boost::dynamic_bitset<> pattern = generate_pattern(rand());
   unsigned int block = rand() % blocks.size();
   *blocks[block] = (*blocks[block]) | pattern;
+}
+
+/*
+ * Returns the time for 1000000 calls to the filter.
+ */
+double AbstractFilter::measure_performance() {
+  clock_t start;
+  double duration;
+
+  start = clock();
+  int false_positive = 0;
+  for(int i = 0; i < 100000000; i++) {
+    if(try_random()) false_positive++;
+  }
+  duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+  return duration;
 }
 
 /*

@@ -12,6 +12,7 @@ class AbstractFilter {
     /* Experimental neccessities */
     bool try_random();
     void add_random();
+    double measure_performance();
   protected:
     virtual boost::dynamic_bitset<> generate_pattern(unsigned long seed_value) = 0;
     vector<boost::dynamic_bitset<>*> blocks;

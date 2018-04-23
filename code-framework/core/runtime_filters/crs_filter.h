@@ -19,4 +19,5 @@ class CRSFilter: public AbstractFilter {
     boost::dynamic_bitset<> generate_pattern(unsigned long seed_value) override;
     vector<unsigned int> primes;
     unsigned long universe = 1;
+    unsigned long bonus = 1;
 };

@@ -20,6 +20,7 @@ class PatternBF {
     vector<boost::dynamic_bitset<>*> blocks;
     boost::mt19937 random_source;
     void print_pattern(boost::dynamic_bitset<> * pattern);
+    void validate_parameters(int num_patterns, int num_items_to_store, int num_blocks, int num_bits);
   public:
     PatternBF();
     PatternBF(int patterns, int items, int num_blocks, int pattern_length);

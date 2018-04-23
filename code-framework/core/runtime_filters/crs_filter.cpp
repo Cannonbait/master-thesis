@@ -43,15 +43,15 @@ CRSFilter::CRSFilter(unsigned int num_bits, unsigned int num_blocks, unsigned in
     universe *= primes[i];
   }
 
+  universe = primes[0]*primes[1];
 }
 
 // Internal helper for constructing a CRS-pattern.
 boost::dynamic_bitset<> CRSFilter::generate_pattern(unsigned long seed_value) {
   size_t pattern_size = blocks[0]->size();
   boost::dynamic_bitset<> pattern = boost::dynamic_bitset<>(pattern_size);
-  unsigned int column = seed_value % (universe*2);
+  unsigned int column = seed_value % universe;
   unsigned int row_base = 0;
-
   for (auto &prime : primes) {
     pattern.set((column % prime) + row_base);
     row_base += prime;

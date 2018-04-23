@@ -1,5 +1,5 @@
 # distutils: language = c++
-# distutils: sources = ../core/lcg_filter/lcg_filter.cpp
+# distutils: sources = ../core/runtime_filters/lcg_filter.cpp
 
 from lcgfilter cimport LCGFilter
 
@@ -15,3 +15,5 @@ cdef class PyLCGFilter:
       return self.filt.add_random()
     def change_lcg(self,new_mod,new_mul,new_inc):
       self.filt.change_lcg(new_mod,new_mul,new_inc)
+    def measure_performance(self):
+      return self.filt.measure_performance()

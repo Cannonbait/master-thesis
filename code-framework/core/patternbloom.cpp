@@ -7,11 +7,10 @@
 #include <sstream>
 #include <boost/dynamic_bitset.hpp>
 #include <chrono>
+#include <stdexcept>
 #include <boost/random.hpp>
 
-
 using namespace std;
-
 
 PatternBF::PatternBF(){}
 
@@ -20,6 +19,7 @@ PatternBF::PatternBF(){}
  *  with k random 1's sampled with replacement. Does not populate the filter.
  */
 PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
+  validate_parameters(num_patterns, num_items_to_store, num_blocks, num_bits);
   for (int i=0; i < num_blocks; i++){
     blocks.push_back(new boost::dynamic_bitset<>(num_bits));
   }
@@ -30,9 +30,15 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
   random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());
   boost::random::uniform_int_distribution<> pattern_dist(0,num_bits-1);
   for (int i = 0; i < num_patterns; i++) {
-    for (int j = 0; j < k; j++){
+    for (int j = 0; j < k; j++) {
       (*patterns[i])[pattern_dist(random_source)] = 1;
     }
+  }
+}
+
+void PatternBF::void validate_parameters(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
+  if(num_patterns < 1 || num_items_to_store < 1 || num_blocks < 1 || num_bits < 1) {
+    throw invalid_argument("One or more arguments are non-positive");
   }
 }
 
