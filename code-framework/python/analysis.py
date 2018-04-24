@@ -13,13 +13,11 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-
-
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
+import matplotlib
 
 #sys.argv[1:] = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-crs"]
 
@@ -87,7 +85,7 @@ def _generate_dimensions(settings):
     dimensions = []
     for key in settings.trial_ranges:
         if len(settings.trial_ranges[key]) > 2:
-            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.trial_ranges[key][2])))
+            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1]+1, settings.trial_ranges[key][2])))
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
