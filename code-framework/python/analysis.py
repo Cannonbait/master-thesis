@@ -12,17 +12,15 @@ from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
 from mpl_toolkits.mplot3d import Axes3D
-
-
-from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
+import matplotlib
 
 
 
-sys.argv[1:] = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-crs"]
+sys.argv[1:] = ["-d_end=150", "-d_step=10", "-che", "-crs"]
 
 
 ######################## PARSE ARGUMENTS
@@ -89,7 +87,7 @@ def _generate_dimensions(settings):
     dimensions = []
     for key in settings.trial_ranges:
         if len(settings.trial_ranges[key]) > 2:
-            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.trial_ranges[key][2])))
+            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1]+1, settings.trial_ranges[key][2])))
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
@@ -182,6 +180,7 @@ def display_data(result, deviation, settings):
         for index, val in enumerate(result[0][0]):
             res = [[dim2[index] for dim2 in dim1] for dim1 in result]
             ax.plot_surface(x,y,np.asarray(res))
+        plt.title("False positive rate as a funtion of " + dimensions[1][0] + " and " + dimensions[0][0])
         plt.xlabel(dimensions[1][0])
         plt.ylabel(dimensions[0][0])
         plt.show()
