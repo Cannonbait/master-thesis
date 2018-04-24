@@ -181,10 +181,10 @@ def display_data(result, deviation, settings):
         fakeLines = []
         names = []
         for index, p_design in enumerate(settings.pattern_designs):
-            print(p_design.get_name(), index)
             names.append(p_design.get_name())
             fakeLines.append(mpl.lines.Line2D([index],[index], linestyle="none", c=line_colors[index], marker = 'o'))
         ax.legend(fakeLines, names, numpoints = 1)
+        plt.title("False positive rate as a funtion of " + dimensions[1][0] + " and " + dimensions[0][0], y=1.08)
         plt.xlabel(dimensions[1][0])
         plt.ylabel(dimensions[0][0])
         plt.show()
