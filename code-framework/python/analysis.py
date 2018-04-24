@@ -11,15 +11,23 @@ from pattern_design.che import CHE
 from pattern_design.comp import COMP
 from pattern_design.identity import IDENTITY
 from pattern_design.crs import CRS
-from pattern_design.qary import QARY
-from pattern_design.rcrs import RCRS
 from mpl_toolkits.mplot3d import Axes3D
-#sys.argv[1:] = ["-m=512", "-n=1500", "-d=120", "-d_end=160", "-b=1", "-che", "-comp", "-crs", "-step_size=20", "-pattern_trials=1", "-tests=10000"]
-#sys.argv[1:] = ["-source='../data-preparation/out.prep'", "-m=512", "-n=1500", "-d=6000", "-d_end=20000", "-b=100", "-che", "-crs", "-step_size=1000", "-pattern_trials=1", "-tests=10000"]
+
+
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, FormatStrFormatter
+import numpy as np
+
+
+
+sys.argv[1:] = ["-d_end=151", "-che", "-crs"]
+
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
-    arguments = { "m": 512, "n": 4096, "d": 120, "d_end": 180, "b": 1 }
+    arguments = { "m": 512, "n": 4096, "d": 120, "b": 10 }
     arguments["tests"] = 10000
     arguments["pattern_trials"] = 5
     arguments["step_size"] = 10
@@ -81,14 +89,22 @@ def _generate_dimensions(settings):
             dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.step_size)))
     return dimensions
 
-def _convert_to_matrix(results, dimensions, settings):
-    if settings.compare:
-        mult = 2
-    else:
-        mult = 1
-    values    = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)*mult])
-    deviation = np.zeros([len(dimensions[0][1]), len(settings.pattern_designs)*mult])
+def convert_to_matrix(results, dimensions, settings):
+    matrix_arguments = []
+    print(dimensions)
+    for dimension in dimensions:
+        matrix_arguments.append(len(dimension[1]))
+
+
+    matrix_arguments.append(len(settings.pattern_designs))
+    print(matrix_arguments)
+    values    = np.zeros(matrix_arguments)
+    deviation = np.zeros(matrix_arguments)
+    print(results)
     for result in results:
+        print(result)
+        print(values[result[0]][:])
+        print(result[1])
         values[result[0]][:] = result[1]
         deviation[result[0]][:] = result[2]
     return (values, deviation)
@@ -110,19 +126,20 @@ def generate_data(settings):
         controller = worker_pool.Controller(settings.path)
         for ix, x in enumerate(dimensions[0][1]):
             parameters[dimensions[0][0]] = x
-            trials.append((ix, parameters.copy()))
-        data = _convert_to_matrix(controller.test(trials, settings), dimensions, settings)
-        return(data)
-    else:
-        fpr = np.zeros([dimensions[0][1].size, dimensions[1][1].size])
-        trial_parameters = parameters.copy()
+            trials.append(((ix), parameters.copy()))
 
+        return(convert_to_matrix(controller.test(trials, settings), dimensions, settings))
+
+    else:
+        trials = []
+        controller = worker_pool.Controller(settings.path)
         for ix, x in enumerate(dimensions[0][1]):
+            parameters[dimensions[0][0]] = x
             for iy, y in enumerate(dimensions[1][1]):
-                trial_parameters[dimensions[0][0]] = x
-                trial_parameters[dimensions[1][0]] = y
-                fpr[ix][iy] = run_trial(trial_parameters, settings)
-        return fpr
+                parameters[dimensions[1][0]] = y
+                trials.append(((ix, iy), parameters.copy()))
+
+        return(convert_to_matrix(controller.test(trials, settings), dimensions, settings))
 
 def _generate_parameters(settings):
     parameters = {}
@@ -166,7 +183,11 @@ def display_data(result, deviation, settings):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         x, y = np.meshgrid(dimensions[1][1], dimensions[0][1])
-        ax.plot_surface(x,y,result)
+        print(x)
+        print(y)
+        print("Result:")
+        print(result[0])
+        ax.plot_surface(x,y,result[0])
         plt.xlabel(dimensions[1][0])
         plt.ylabel(dimensions[0][0])
         plt.show()
