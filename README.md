@@ -13,8 +13,7 @@ Install boost from boost.org
 
 ### Ubuntu 16.04
 ```
-$ apt-get install libgmp3-dev
-$ apt-get install libboost-dev python3-numpy python3-tk
+$ apt-get install libboost-dev python3-numpy python3-tk libgmp3-dev
 $ pip3 install cython matplotlib pandas
 ```
 
@@ -49,7 +48,6 @@ Found no "source" argument, trials will be run with random input
 Initializing filters...
 
 ```
-<<<<<<< f72d6d2bfd46dfe10d6c8c6ed2843d6f798a63e9
 This will run a quick demo comparing the CHE (Cache- Hash- efficent) and COMP (Combinatorial Orthogonal Matching Pursuit) algorithms as pattern designs for some default parameters. The execution time can vary from machine to machine depending on the cachesize. This should in the end display a graph looking something like this:
 
 ![Framework demo](https://github.com/Cannonbait/master-thesis/blob/master/readme_img.png)
@@ -71,17 +69,29 @@ Where the Y-axis represents the false positive rate (FPR) with standard deviatio
 To be able to get a visualization, one or two parameters must vary. This is done by adding a new flag on the varying parameter(s) with "\_end" appended. For example, if one wants to experiment for varying values of d as in the example, one can choose the flags -d=120 and -d_end=160. The parameters that can vary are m, n, d and b. If two parameters vary, the displayed graph will be in three dimensions, for example:
 
 ```
-$ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10
+$ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10 -step_size=100
 Found no "source" argument, trials will be run with random input
 Initializing filters...
 ```
 ## Python code
 
-# Generating new pattern designs
+# Writing new patter-design generators
+Writing a new generator is a fiarly easy task. Provided for guidance is an interface called __IPatternGenerator__ located in the *master-thesis/code-framework/python/pattern_design* folder. This interface is reuired of the generators to implement but only demands two definitions: *get_name* and *generate_patterns(m,n,d,b)*, where *generate_patterns* should return a matrix of dimensions *mxn* as patterns in the BBFBP. The *get_name* method is only used in the visualization for easy of identifying the new algorithm. Below is an example of a (stupid) pattern generator:
 
-=======
-apt-get install libboost-dev python3-pip python3 python3-numpy python3-tk lib3gmp3-dev
-pip3 install cython matplotlib pandas
+```python
+from pattern_design.pattern_interface import IPatternGenerator
+import numpy as np
 
-´´´
->>>>>>> Updated readme
+class ExampleGenerator(IPatternGenerator):
+
+    def generate_patterns(m,n,d,b):
+        patterns = np.zeros((m,n), dtype='bool')
+          for i in range(n):
+            patterns[i % m][i] = 1
+        return patterns
+
+    def get_name():
+        return "Example Generator"
+
+```
+
