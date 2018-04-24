@@ -13,6 +13,7 @@ Install boost from boost.org
 
 ### Ubuntu 16.04
 ```
+$ apt-get install libgmp3-dev
 $ apt-get install libboost-dev python3-numpy python3-tk
 $ pip3 install cython matplotlib pandas
 ```
@@ -24,13 +25,13 @@ create a .so file which can be imported into python separately or used with the 
 
 ### Windows
 ```
-$ cd cython
+$ cd <your path>/master-thesis/code-framework/cython
 $ python3 setup_serial_framework_win.py
 ```
 
 ### Ubuntu 16.04
 ```
-$ cd cython
+$ cd <your path>/master-thesis/code-framework/cython
 $ python3 setup_serial_framework_nix.py build_ext --inplace
 ```
 # Running the analysis tool
@@ -52,8 +53,27 @@ This will run a quick demo comparing the CHE (Cache- Hash- efficent) and COMP (C
 
 ![Framework demo](https://github.com/Cannonbait/master-thesis/blob/master/readme_img.png)
 
-Where the Y-axis represents the false positive rate (FPR) with standard deviation and the X-axis the number of insertions into the filter (d). These parameters can be customized be various flags supplied to the terminal.
+Where the Y-axis represents the false positive rate (FPR) with standard deviation and the X-axis the number of insertions into the filter (d). These parameters can be customized be various flags supplied to the terminal. The customizable parameters are as follows:
+```
+-m=x                where x is the number of bits in the filter (defaults to 512)
+-n=x                where x is the number of patterns in the filter (defaults to 4096)
+-d=x                where x is the number of insertions in the filter (defaults to 120)
+-b=x                where x is the number of blocks in the filter (defaults to 1)
+-tests=x            where x is the number of tests on datapoints towards the filter. (defaults to 10000)
+-step_size=x        where x is the step size on the varying parameter as explained below (defaults to 10)
+-pattern_trials=x   where x is the number of times the patterns should be regenerated according to the specified designs and tested. This parameter affects the standard deviation in the graph (defaults to 5)
+-comp               the COMP-algorithm as a pattern design (used for comparative purposes)
+-che                the CHE-algorithm as a pattern design (used for comparative purposes)
+-crs                the CRS-algorithm as a pattern design (used for comparative purposes)
+-source="<file>"    a source file with precomputed data in number format, separated by linebreak. The framework allows for high precision and can parse numbers up to 120 characters long. These numbers are then hashed using modulohashing for a more uniform distribution. 
+```
+To be able to get a visualization, one or two parameters must vary. This is done by adding a new flag on the varying parameter(s) with "\_end" appended. For example, if one wants to experiment for varying values of d as in the example, one can choose the flags -d=120 and -d_end=160. The parameters that can vary are m, n, d and b. If two parameters vary, the displayed graph will be in three dimensions, for example:
 
+```
+$ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10
+Found no "source" argument, trials will be run with random input
+Initializing filters...
+```
 ## Python code
 
 # Generating new pattern designs
