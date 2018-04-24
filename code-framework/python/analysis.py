@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../cython/')
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -20,10 +21,7 @@ from matplotlib import cm
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
 import numpy as np
 
-
-
-sys.argv[1:] = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-crs"]
-
+#sys.argv[1:] = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-crs"]
 
 ######################## PARSE ARGUMENTS
 def default_arguments():
@@ -125,7 +123,6 @@ def generate_data(settings):
             trials.append(((ix), parameters.copy()))
 
         return(convert_to_matrix(controller.test(trials, settings), dimensions, settings))
-
     else:
         trials = []
         controller = worker_pool.Controller(settings.path)
@@ -153,11 +150,11 @@ def _generate_parameters(settings):
 
 def display_data(result, deviation, settings):
     dimensions = _generate_dimensions(settings)
+    line_colors = ['tab:orange', 'b', 'g', 'c', 'm', 'r', 'k']
     if len(dimensions) == 1:
         fig, ax = plt.subplots()
         x = dimensions[0][1]
         if settings.compare:
-            line_colors = ['r', 'g', 'b', 'c', 'm', 'y', 'k']
             for i in range(0,(result.shape)[1],2):
                 ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o',c=line_colors[i//2])
                 ax.errorbar(x,result[:,i+1],deviation[:,i+1],fmt='s--',c=line_colors[i//2])
@@ -181,7 +178,15 @@ def display_data(result, deviation, settings):
         x, y = np.meshgrid(dimensions[1][1], dimensions[0][1])
         for index, val in enumerate(result[0][0]):
             res = [[dim2[index] for dim2 in dim1] for dim1 in result]
-            ax.plot_surface(x,y,np.asarray(res))
+            ax.plot_surface(x,y,np.asarray(res),color=line_colors[index])
+        # Add legend for planes
+        fakeLines = []
+        names = []
+        for index, p_design in enumerate(settings.pattern_designs):
+            print(p_design.get_name(), index)
+            names.append(p_design.get_name())
+            fakeLines.append(mpl.lines.Line2D([index],[index], linestyle="none", c=line_colors[index], marker = 'o'))
+        ax.legend(fakeLines, names, numpoints = 1)
         plt.xlabel(dimensions[1][0])
         plt.ylabel(dimensions[0][0])
         plt.show()
