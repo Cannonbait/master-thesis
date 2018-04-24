@@ -22,7 +22,7 @@ import numpy as np
 
 
 
-sys.argv[1:] = ["-d_end=151", "-che", "-crs"]
+sys.argv[1:] = ["-d_end=151", "-b_end=21", "-che", "-crs"]
 
 
 ######################## PARSE ARGUMENTS
@@ -91,20 +91,13 @@ def _generate_dimensions(settings):
 
 def convert_to_matrix(results, dimensions, settings):
     matrix_arguments = []
-    print(dimensions)
     for dimension in dimensions:
         matrix_arguments.append(len(dimension[1]))
 
-
     matrix_arguments.append(len(settings.pattern_designs))
-    print(matrix_arguments)
     values    = np.zeros(matrix_arguments)
     deviation = np.zeros(matrix_arguments)
-    print(results)
     for result in results:
-        print(result)
-        print(values[result[0]][:])
-        print(result[1])
         values[result[0]][:] = result[1]
         deviation[result[0]][:] = result[2]
     return (values, deviation)
@@ -183,11 +176,9 @@ def display_data(result, deviation, settings):
         fig = plt.figure()
         ax = fig.gca(projection='3d')
         x, y = np.meshgrid(dimensions[1][1], dimensions[0][1])
-        print(x)
-        print(y)
-        print("Result:")
-        print(result[0])
-        ax.plot_surface(x,y,result[0])
+        for index, val in enumerate(result[0][0]):
+            res = [[dim2[index] for dim2 in dim1] for dim1 in result]
+            ax.plot_surface(x,y,np.asarray(res))
         plt.xlabel(dimensions[1][0])
         plt.ylabel(dimensions[0][0])
         plt.show()
