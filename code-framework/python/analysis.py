@@ -22,7 +22,7 @@ import numpy as np
 
 
 
-sys.argv[1:] = ["-d_end=151", "-b_end=21", "-che", "-crs"]
+sys.argv[1:] = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-crs"]
 
 
 ######################## PARSE ARGUMENTS
@@ -30,7 +30,6 @@ def default_arguments():
     arguments = { "m": 512, "n": 4096, "d": 120, "b": 10 }
     arguments["tests"] = 10000
     arguments["pattern_trials"] = 5
-    arguments["step_size"] = 10
     return arguments
 
 def _extract_argument(argv, symbol):
@@ -50,10 +49,14 @@ class Analysis_Settings:
             end = _extract_argument(argv, symbol+"_end")
             if end != None:
                 self.trial_ranges[symbol].append(end)
+                step = _extract_argument(argv, symbol+"_step")
+                if step != None:
+                    self.trial_ranges[symbol].append(step)
+                else:
+                    self.trial_ranges[symbol].append(1)
 
         self.tests = _extract_argument(argv, "tests")
         self.pattern_trials = _extract_argument(argv, "pattern_trials")
-        self.step_size = _extract_argument(argv, "step_size")
 
         if any([s.startswith("-compare=") for s in argv]):
             self.compare = [x for x in sys.argv if x.startswith("-compare=")][0][len("-compare="):]
@@ -85,8 +88,8 @@ class Analysis_Settings:
 def _generate_dimensions(settings):
     dimensions = []
     for key in settings.trial_ranges:
-        if len(settings.trial_ranges[key]) == 2:
-            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.step_size)))
+        if len(settings.trial_ranges[key]) > 2:
+            dimensions.append((key, np.arange(settings.trial_ranges[key][0], settings.trial_ranges[key][1], settings.trial_ranges[key][2])))
     return dimensions
 
 def convert_to_matrix(results, dimensions, settings):
