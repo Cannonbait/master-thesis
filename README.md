@@ -69,10 +69,12 @@ Where the Y-axis represents the false positive rate (FPR) with standard deviatio
 To be able to get a visualization, one or two parameters must vary. This is done by adding a new flag on the varying parameter(s) with "\_end" appended. For example, if one wants to experiment for varying values of d as in the example, one can choose the flags -d=120 and -d_end=160. The parameters that can vary are m, n, d and b. If two parameters vary, the displayed graph will be in three dimensions, for example:
 
 ```
-$ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10 -step_size=100
+$ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10 -d_step=100 -n_step=100
 Found no "source" argument, trials will be run with random input
 Initializing filters...
 ```
+
+![3D demo](https://github.com/Cannonbait/master-thesis/blob/master/3dreadme.png)
 ## Python code
 
 # Writing new patter-design generators
