@@ -31,11 +31,8 @@ class Consumer(multiprocessing.Process):
         while True:
             next_task = self.task_queue.get()
             if next_task is None:
-                # Poison pill means shutdown
                 self.task_queue.task_done()
                 break
-##            if self.display:
-##                progbar(next_task.total-self.task_queue.qsize() + self.num_consumers, next_task.total,40)
             vals = []
             deviation = []
             for i, pattern_generator in enumerate(next_task.pattern_generators):

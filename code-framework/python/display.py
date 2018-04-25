@@ -1,6 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D 
 import numpy as np
 
 _display_colors = ['tab:orange', 'b', 'g', 'c', 'm', 'r', 'k']
