@@ -8,8 +8,9 @@ The analysis tools are bult in Python while the inner loop is written in C++. Bi
 
 ### Windows
 ```
-Install boost from boost.org
+Install GMP (high precision liberary, Cython and Boost)
 ```
+__Note__: The windows build is highly experimental. Should you manage to successfully install GMP, Cython and boost the setup in the following section should work. However we will not guide you through that process.
 
 ### Ubuntu 16.04
 ```
@@ -27,6 +28,7 @@ create a .so file which can be imported into python separately or used with the 
 $ cd <your path>/master-thesis/code-framework/cython
 $ python3 setup_serial_framework_win.py
 ```
+Should the build fail it might be because of invalid pathings to the liberaries (GMP etc). Check the _setup_serial_framework_win.py_ file as well as the _serial_framework.pxd_ and _serial_framework.pyx_ files to correct the pathings as installed on your system.
 
 ### Ubuntu 16.04
 ```
@@ -73,10 +75,46 @@ $ python3 analysis.py -crs -comp -d=1200 -d_end=1600 -n=1500 -n_end=2000 -b=10 -
 Found no "source" argument, trials will be run with random input
 Initializing filters...
 ```
-
 ![3D demo](https://github.com/Cannonbait/master-thesis/blob/master/3dreadme.png)
-## Python code
 
+For reasons of readability, standard deviation will not be displayed when plotting the data in 3D. One should also note that generating 3D-plots take significantly more time than a standard 2D-plot. 
+
+## Python code
+To run the program from Python, three steps need to be completed. Setting the various parameters for the experiments as outlined above, generating data and displaying it. This is done in the following fashion:
+
+```python   
+import sys                                              # Use if using system arguments 
+
+from analysis_settings import AnalysisSettings
+from display import display_data
+from data_generator import generate_data
+
+settings = AnalysisSettings(sys.argv)           # Sets the settings according to supplied flags
+(result, deviation) = generate_data(settings)   # generates the data for the plot
+display_data(result, deviation, settings)       # displays the data (infers dimensions)
+
+```
+Data can of course be generated without displaying it. If you do not want to set the flags at upstart, the argumentline can be changed to any list of strings which contains flags. For example, this is also valid code:
+```python   
+from analysis_settings import AnalysisSettings
+from display import display_data
+from data_generator import generate_data
+
+arguments = ["-d_end=151", "-d_step=10", "-b_step=2", "-b_end=21", "-che", "-comp"]
+settings = AnalysisSettings(arguments)           
+(result, deviation) = generate_data(settings)   
+display_data(result, deviation, settings)       
+
+```
+Generated data can be saved to file (and loaded from file) using the build in utils functions outlined below:
+```python
+from analysis_utils import save_results, load_results_from_file
+
+def save_results(results,deviation,filename):
+    ...
+def load_results_from_file(filepath):
+    ...
+```
 # Writing new patter-design generators
 Writing a new generator is a fiarly easy task. Provided for guidance is an interface called __IPatternGenerator__ located in the *master-thesis/code-framework/python/pattern_design* folder. This interface is reuired of the generators to implement but only demands two definitions: *get_name* and *generate_patterns(m,n,d,b)*, where *generate_patterns* should return a matrix of dimensions *mxn* as patterns in the BBFBP. The *get_name* method is only used in the visualization for easy of identifying the new algorithm. Below is an example of a (stupid) pattern generator:
 
@@ -96,4 +134,17 @@ class ExampleGenerator(IPatternGenerator):
         return "Example Generator"
 
 ```
+Any generator created in this way can be added to the settings as displayed above (using the _add_designs_ method). This can be done in the following fashion:
+```python   
+import sys                                              # If using system arguments 
 
+from analysis_settings import AnalysisSettings
+from pattern_design.example import ExampleGenerator     # Used for example
+from display import display_data
+from data_generator import generate_data
+
+settings = AnalysisSettings(sys.argv)          
+settings.add_designs([ExampleGenerator])        # Adds the example generator to the settings
+(result, deviation) = generate_data(settings)   
+display_data(result, deviation, settings)      
+```
