@@ -53,10 +53,10 @@ class AnalysisSettings:
             self.pattern_designs.append(COMP)
         if any([s.startswith("-crs") for s in argv]):
             self.pattern_designs.append(CRS)
-        if len(self.pattern_designs) == 0:
-            print("No pattern designs flagged. Exiting...")
-            sys.exit(0)
 
     @staticmethod
     def create_setting(designs, **arguments):
         return 0
+
+    def add_designs(self,designs):
+        self.pattern_designs += designs

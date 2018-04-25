@@ -1,8 +1,8 @@
 import sys
-sys.path.append("../cython/")
+
 from analysis_settings import AnalysisSettings
 from pattern_design.example import ExampleGenerator
-from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from pattern_design.comp import COMP
 from display import display_data
 from data_generator import generate_data
 
@@ -10,6 +10,6 @@ from data_generator import generate_data
 
 if __name__ == '__main__':
     settings = AnalysisSettings(sys.argv)
-    settings.pattern_designs.append(ExampleGenerator)
+    settings.add_designs([ExampleGenerator,COMP])
     (result, deviation) = generate_data(settings)
     display_data(result, deviation, settings)

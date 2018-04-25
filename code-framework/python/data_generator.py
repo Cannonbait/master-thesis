@@ -24,6 +24,9 @@ def _convert_to_matrix(results, dimensions, settings):
 
 def generate_data(settings):
     # Check that each pattern generator is an instance of the interface
+    if len(settings.pattern_designs) == 0:
+        raise ValueError("No designs for patterns are provided")
+        
     if not all([issubclass(gen, IPatternGenerator) for gen in settings.pattern_designs]):
         raise ValueError('One or more generators does not implement the IPatternGenerator interface.')
 
