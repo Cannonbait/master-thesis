@@ -1,7 +1,7 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pandas as pd
-from mpl_toolkits.mplot3d import Axes3D 
+from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 _display_colors = ['tab:orange', 'b', 'g', 'c', 'm', 'r', 'k']
@@ -43,6 +43,7 @@ def _display_one_dimension(result, deviation, settings, dimensions):
     plt.xlabel(dimensions[0][0])
     plt.ylabel("FPR")
     plt.title("False positive rate as a funtion of " + dimensions[0][0])
+    plt.grid(True)
     plt.show()
 
 def _display_two_dimensions(result, deviation, settings, dimensions):
@@ -62,5 +63,6 @@ def _display_two_dimensions(result, deviation, settings, dimensions):
     plt.title("False positive rate as a funtion of " + dimensions[1][0] + " and " + dimensions[0][0], y=1.08)
     plt.xlabel(dimensions[1][0])
     plt.ylabel(dimensions[0][0])
+    plt.grid(True)
     ax.set_zlabel("FPR")
     plt.show()
