@@ -1,6 +1,6 @@
 from pattern_design.che import CHE
 from pattern_design.comp import COMP
-from pattern_design.crs import CRS
+from pattern_design.mcrs import MCRS
 import sys
 
 def default_arguments():
@@ -51,8 +51,8 @@ class AnalysisSettings:
             self.pattern_designs.append(CHE)
         if any([s.startswith("-comp") for s in argv]):
             self.pattern_designs.append(COMP)
-        if any([s.startswith("-crs") for s in argv]):
-            self.pattern_designs.append(CRS)
+        if any([s.startswith("-mcrs") for s in argv]):
+            self.pattern_designs.append(MCRS)
 
     @staticmethod
     def create_setting(designs, **arguments):
