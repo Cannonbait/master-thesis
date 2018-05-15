@@ -40,9 +40,13 @@ def _display_one_dimension(result, deviation, settings, dimensions):
             ax.errorbar(x,result[:,i],deviation[:,i],fmt='-o')
         plt.legend([p_design.get_name() for p_design in settings.pattern_designs])
 
-    plt.xlabel(dimensions[0][0])
+    if(settings.interpret):
+        label = _interpret_parameter(dimensions[0][0])
+    else:
+        label = dimensions[0][0]
+    plt.xlabel(label)
     plt.ylabel("FPR")
-    plt.title("False positive rate as a funtion of " + dimensions[0][0])
+    plt.title("False positive rate as a funtion of " + label)
     plt.grid(True)
     plt.show()
 
@@ -60,9 +64,29 @@ def _display_two_dimensions(result, deviation, settings, dimensions):
         names.append(p_design.get_name())
         fakeLines.append(mpl.lines.Line2D([index],[index], linestyle="none", c=_display_colors[index], marker = 'o'))
     ax.legend(fakeLines, names, numpoints = 1)
-    plt.title("False positive rate as a funtion of " + dimensions[1][0] + " and " + dimensions[0][0], y=1.08)
-    plt.xlabel(dimensions[1][0])
-    plt.ylabel(dimensions[0][0])
+
+    if(settings.interpret):
+        x_label = _interpret_parameter(dimensions[1][0])
+        y_label = _interpret_parameter(dimensions[0][0])
+    else:
+        x_label = dimensions[1][0]
+        y_label = dimensions[0][0]
+
+    plt.title("False positive rate as a funtion of " + x_label + " and " + y_label, y=1.08)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
     plt.grid(True)
     ax.set_zlabel("FPR")
     plt.show()
+
+def _interpret_parameter(key):
+    if key is "m":
+        return "bits"
+    elif key is "n":
+        return "patterns"
+    elif key is "b":
+        return "blocks"
+    elif key is "d":
+        return "inserted items"
+    else:
+        return "Unknown range"
