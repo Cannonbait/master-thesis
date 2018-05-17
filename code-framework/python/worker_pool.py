@@ -13,53 +13,49 @@ def progbar(curr, total, full_progbar):
 
 class Consumer(multiprocessing.Process):
 
-    def __init__(self, task_queue, result_queue, path, display):
+    def __init__(self, task_queue, result_queue, sources, display):
         multiprocessing.Process.__init__(self)
         self.task_queue = task_queue
         self.result_queue = result_queue
-        self.path = path
+        self.sources = sources
         self.display = display
         self.num_consumers = multiprocessing.cpu_count() - 1 # For progress
 
     def run(self):
-        proc_name = self.name
-        if(self.path != None):
-          framework = serial_framework.PySerialFramework()
-          framework.with_path(self.path)
-        else:
-          framework = serial_framework.PySerialFramework()
+        for source in self.sources:
+            framework = serial_framework.PySerialFramework()
+            framework.add_source(source)
         while True:
             next_task = self.task_queue.get()
             if next_task is None:
                 self.task_queue.task_done()
                 break
-            vals = []
-            deviation = []
+            vals = [[] for source in self.sources]
+            deviations = [[] for source in self.sources]
             for i, pattern_generator in enumerate(next_task.pattern_generators):
-                temp_val = []
-                temp_second = []
+                temp_val = [[] for source in self.sources]
                 for trial in range(0, next_task.pattern_trials):
-                    temp_val.append(framework.test(next_task.get_patterns(pattern_generator),
-                    next_task.bits, next_task.store, next_task.blocks,
-                    next_task.tests))
-                    if next_task.compare:
-                        temp_second.append(framework.test_no_path(next_task.get_patterns(pattern_generator),
-                        next_task.bits, next_task.store, next_task.blocks,
-                        next_task.tests))
-                average = sum(temp_val)/next_task.pattern_trials
-                vals.append(average)
-                deviation.append(np.std(temp_val))
-                if next_task.compare:
-                    average = sum(temp_second)/next_task.pattern_trials
-                    vals.append(average)
-                    deviation.append(np.std(temp_second))
+                    patterns = next_task.get_patterns(pattern_generator)
+                    for iSource, source in enumerate(self.sources):
+                        result = framework.test(next_task.get_patterns(pattern_generator),
+                            next_task.bits, next_task.store, next_task.blocks,
+                            next_task.tests, source)
+                        temp_val[iSource].append(result)
+                averages = [sum(val)/next_task.pattern_trials for val in temp_val]
+                deviation = [np.std(val) for val in temp_val]
+
+                conversion = [[] for source in self.sources]
+                for ix, val in enumerate(averages):
+                    vals[ix].append(val)
+                for ix, val in enumerate(deviation):
+                    deviations[ix].append(val)
             self.task_queue.task_done()
-            self.result_queue.put((next_task.indexes, vals, deviation))
+            self.result_queue.put((next_task.indexes, vals, deviations))
 
 
 class Task:
 
-    def __init__(self, indexes, pattern_generators, bits, num_patterns, store, blocks, tests, pattern_trials, total, compare):
+    def __init__(self, indexes, pattern_generators, bits, num_patterns, store, blocks, tests, pattern_trials, total):
         self.indexes = indexes
         self.pattern_generators = pattern_generators
         self.bits = bits
@@ -69,7 +65,6 @@ class Task:
         self.tests = tests
         self.pattern_trials = pattern_trials
         self.total = total
-        self.compare = compare
 
     def get_patterns(self, generator):
       return generator.generate_patterns(self.bits, self.num_patterns, self.store, self.blocks)
@@ -98,7 +93,7 @@ class Controller:
         for trial in trials:
             self.tasks.put(Task(trial[0], settings.pattern_designs, trial[1]['m'],
             trial[1]['n'], trial[1]['d'],trial[1]['b'], settings.tests,
-            settings.pattern_trials, len(trials), settings.compare))
+            settings.pattern_trials, len(trials)))
 
         # Add a poison pill for each consumer
         for i in range(self.num_consumers):

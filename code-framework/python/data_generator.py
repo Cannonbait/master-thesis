@@ -15,12 +15,15 @@ def _convert_to_matrix(results, dimensions, settings):
         matrix_arguments.append(len(dimension[1]))
 
     matrix_arguments.append(len(settings.pattern_designs))
-    values    = np.zeros(matrix_arguments)
-    deviation = np.zeros(matrix_arguments)
-    for result in results:
-        values[result[0]][:] = result[1]
-        deviation[result[0]][:] = result[2]
-    return (values, deviation)
+    matrices = []
+    for ix, source in enumerate(settings.sources):
+        values    = np.zeros(matrix_arguments)
+        deviation = np.zeros(matrix_arguments)
+        for result in results:
+            values[result[0]][:] = result[1][ix]
+            deviation[result[0]][:] = result[2][ix]
+        matrices.append((values, deviation))
+    return matrices
 
 def generate_data(settings):
     # Check that each pattern generator is an instance of the interface
@@ -37,14 +40,14 @@ def generate_data(settings):
         raise ValueError('No ranges not supported')
     elif len(dimensions) == 1:
         trials = []
-        controller = worker_pool.Controller(settings.path)
+        controller = worker_pool.Controller(settings.sources)
         for ix, x in enumerate(dimensions[0][1]):
             parameters[dimensions[0][0]] = x
             trials.append(((ix), parameters.copy()))
         return(_convert_to_matrix(controller.test(trials, settings), dimensions, settings))
     else:
         trials = []
-        controller = worker_pool.Controller(settings.path)
+        controller = worker_pool.Controller(settings.sources)
         for ix, x in enumerate(dimensions[0][1]):
             parameters[dimensions[0][0]] = x
             for iy, y in enumerate(dimensions[1][1]):

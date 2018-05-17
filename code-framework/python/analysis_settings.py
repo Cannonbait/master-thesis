@@ -35,17 +35,16 @@ class AnalysisSettings:
         self.tests = _extract_argument(argv, "tests")
         self.pattern_trials = _extract_argument(argv, "pattern_trials")
 
-        if any([s.startswith("-compare=") for s in argv]):
-            self.compare = [x for x in sys.argv if x.startswith("-compare=")][0][len("-compare="):]
-        else:
-            self.compare = False
-        if any([s.startswith("-source=") for s in argv]):
-            self.path = [x for x in sys.argv if x.startswith("-source=")][0][len("-source="):]
-            print("Using data from ", self.path)
-        else:
-            print("Found no \"source\" argument, trials will be run with random input")
-            self.compare = False
-            self.path = None
+        self.sources = []
+        for source in [s for s in argv if s.startswith("-source=")]:
+            if (source[len("-source=")] == "Random"):
+                self.sources.append("random")
+            else:
+                self.sources.append(source[len("-source="):])
+            print("Using data from ", source)
+        if not self.sources:
+            print("Found no \"source\" argument, falling back to RNG as source")
+            self.sources.append("random")
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
             self.pattern_designs.append(CHE)
