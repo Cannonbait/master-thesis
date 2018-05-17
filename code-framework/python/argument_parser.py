@@ -46,6 +46,7 @@ class AnalysisSettings:
             print("Found no \"source\" argument, falling back to RNG as source")
             self.sources.append("random")
         self.pattern_designs = []
+        self.interpret = any([s.startswith("-interpret") for s in argv])
         if any([s.startswith("-che") for s in argv]):
             self.pattern_designs.append(CHE)
         if any([s.startswith("-comp") for s in argv]):
