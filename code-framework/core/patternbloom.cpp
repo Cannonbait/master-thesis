@@ -36,7 +36,7 @@ PatternBF::PatternBF(int num_patterns, int num_items_to_store, int num_blocks, i
   }
 }
 
-void PatternBF::void validate_parameters(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
+void PatternBF::validate_parameters(int num_patterns, int num_items_to_store, int num_blocks, int num_bits) {
   if(num_patterns < 1 || num_items_to_store < 1 || num_blocks < 1 || num_bits < 1) {
     throw invalid_argument("One or more arguments are non-positive");
   }
