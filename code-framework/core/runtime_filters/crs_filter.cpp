@@ -35,6 +35,16 @@ CRSFilter::CRSFilter(unsigned int num_bits, unsigned int num_blocks, unsigned in
     case 5: primes = { 73, 101, 103, 107, 127 }; break;
     case 6: primes = { 61, 79, 83, 89, 97, 101 }; break;
     case 7: primes = { 59, 61, 83, 67, 71, 73, 97 }; break;
+    case 8: primes = { 47, 53, 59, 61, 67, 71, 73, 79 }; break;
+    case 9: primes = { 43, 47, 53, 59, 61, 67, 71, 73, 37 }; break;
+    case 10: primes = { 31, 37, 41, 43, 47, 53, 59, 61, 67, 71 }; break;
+    case 11: primes = { 23, 29, 31, 37, 41, 43, 47, 53, 61, 67, 79 }; break;
+    case 12: primes = { 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67 }; break;
+    case 13: primes = { 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 97 }; break;
+    case 14: primes = { 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 67, 79 }; break;
+    case 15: primes = { 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 79 }; break;
+    case 16: primes = { 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 73 }; break;
+    case 17: primes = { 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 73 }; break;
     default:
       primes = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61 };
   }
@@ -42,8 +52,6 @@ CRSFilter::CRSFilter(unsigned int num_bits, unsigned int num_blocks, unsigned in
   for(unsigned int i = 0; i < primes.size(); i++) {
     universe *= primes[i];
   }
-
-  universe = primes[0]*primes[1];
 }
 
 // Internal helper for constructing a CRS-pattern.
@@ -52,7 +60,8 @@ boost::dynamic_bitset<> CRSFilter::generate_pattern(unsigned long seed_value) {
   boost::dynamic_bitset<> pattern = boost::dynamic_bitset<>(pattern_size);
   unsigned int column = seed_value % universe;
   unsigned int row_base = 0;
-  for (auto &prime : primes) {
+
+  for(auto && prime: primes) {
     pattern.set((column % prime) + row_base);
     row_base += prime;
   }

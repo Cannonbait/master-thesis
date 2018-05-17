@@ -46,6 +46,7 @@ class AnalysisSettings:
             print("Found no \"source\" argument, trials will be run with random input")
             self.compare = False
             self.path = None
+        self.interpret = any([s.startswith("-interpret") for s in argv])
         self.pattern_designs = []
         if any([s.startswith("-che") for s in argv]):
             self.pattern_designs.append(CHE)
