@@ -54,13 +54,11 @@ def _display_two_dimensions(results, settings, dimensions):
     ax = fig.gca(projection='3d')
     x, y = np.meshgrid(dimensions[1][1], dimensions[0][1])
 
-    print("a")
     for ix, result in enumerate(results):
         for iy, pattern_design in enumerate(settings.pattern_designs):
             res = [[dim2[iy] for dim2 in dim1] for dim1 in result[0]]
             color = iy + ix*len(settings.pattern_designs)
             ax.plot_surface(x,y,np.asarray(res),color=_display_colors[color])
-    print("b")
 
     # Add legend for planes
     fakeLines = []
