@@ -9,85 +9,91 @@
 #include <boost/random.hpp>
 #include <random>
 #include <stdexcept>
+#include <unordered_map>
 
 using namespace std;
 
 SerialFramework::SerialFramework() {}
 
-SerialFramework::SerialFramework(string path) {
-  random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count()*47);
-  ifstream data_file(path);
-  string line;
-  while (getline(data_file, line)) {
-    source.push_back(line);
+void SerialFramework::add_source(string source){
+  
+  if (source == "random"){
+    random_source = boost::mt19937(std::chrono::system_clock::now().time_since_epoch().count());  
+  }
+  else{
+    ifstream data_file(source);
+    string line;
+    vector<string> read_file;
+    while (getline(data_file, line)) {
+      read_file.push_back(line);
+    }
+    sources[source] = read_file;
   }
 }
 
-double SerialFramework::test_no_path(vector<vector<bool>> patterns,
-          int bits, int store, int blocks, int tests) {
-    validate_parameters(patterns, bits, store, blocks, tests);
-    PatternBF bf(convert_patterns(patterns), blocks);
-    bf.add_many(store);
-    return bf.test_rng(tests);
-}
 
 double SerialFramework::test(vector<vector<bool>> patterns,
-          int bits, int store, int blocks, int tests) {
-
+          int bits, int store, int blocks, int tests, string source) {
   validate_parameters(patterns, bits, store, blocks, tests);
+
   //Create pattern
   PatternBF bf(convert_patterns(patterns), blocks);
-  if (source.empty()) {
+
+
+  if (source == "random") {
     bf.add_many(store);
     return bf.test_rng(tests);
-  } else {
-    //Store data
-    mpz_t value, block_i, pattern_i;
-    mpz_init(value);
-    mpz_init(block_i);
-    mpz_init(pattern_i);
+  } 
 
-    int multiplier = 47;
-    int block_index, pattern_index, universe, storage_index;
-    string data_point;
+  //Initialize needed values
+  mpz_t value, block_i, pattern_i;
+  mpz_init(value);
+  mpz_init(block_i);
+  mpz_init(pattern_i);
 
-    universe = source.size()-1;
-    std::uniform_int_distribution<int> dist_blk(0, universe);
+  int multiplier = 47;
+  int block_index, pattern_index, universe, storage_index;
+  string data_point;
 
-    for(unsigned int i = 0; i < store; i++) {
-      storage_index = dist_blk(random_source) % universe;
-      data_point = source[storage_index];
-      stored.push_back(data_point);
-      // Hash the value and get block/pattern indices
-      mpz_set_str(value, data_point.c_str(), 10);
-      mpz_mul_ui(value, value, multiplier);
-      mpz_mod_ui(block_i, value, blocks);
-      mpz_mod_ui(pattern_i, value, patterns.size());
-      block_index   = mpz_get_ui(block_i);
-      pattern_index = mpz_get_ui(pattern_i);
-      bf.add_indexes(block_index, pattern_index);
+  universe = sources[source].size()-1;
+  std::uniform_int_distribution<int> dist_blk(0, universe);
+
+  //Store data
+  for(unsigned int i = 0; i < store; i++) {
+    storage_index = dist_blk(random_source) % universe;
+    data_point = sources[source][storage_index];
+    stored[source].push_back(data_point);
+    // Hash the value and get block/pattern indices
+    mpz_set_str(value, data_point.c_str(), 10);
+    mpz_mul_ui(value, value, multiplier);
+    mpz_mod_ui(block_i, value, blocks);
+    mpz_mod_ui(pattern_i, value, patterns.size());
+    block_index   = mpz_get_ui(block_i);
+    pattern_index = mpz_get_ui(pattern_i);
+    bf.add_indexes(block_index, pattern_index);
+  }
+
+  //Run tests
+  int contained = 0;
+  for(unsigned int i = 0; i < tests; i++) {
+    storage_index = dist_blk(random_source) % universe;
+    data_point = sources[source][storage_index];
+    mpz_set_str(value, data_point.c_str(), 10);
+    mpz_mul_ui(value, value, multiplier);
+    mpz_mod_ui(block_i, value, blocks);
+    mpz_mod_ui(pattern_i, value, patterns.size());
+    block_index   = mpz_get_ui(block_i);
+    pattern_index = mpz_get_ui(pattern_i);
+
+    if((!is_true_positive(data_point, source)) && bf.test(block_index,pattern_index)) {
+        contained++;
     }
-
-    int contained = 0;
-    for(unsigned int i = 0; i < tests; i++) {
-      storage_index = dist_blk(random_source) % universe;
-      data_point = source[storage_index];
-      mpz_set_str(value, data_point.c_str(), 10);
-      mpz_mul_ui(value, value, multiplier);
-      mpz_mod_ui(block_i, value, blocks);
-      mpz_mod_ui(pattern_i, value, patterns.size());
-      block_index   = mpz_get_ui(block_i);
-      pattern_index = mpz_get_ui(pattern_i);
-
-      if((!is_true_positive(data_point)) && bf.test(block_index,pattern_index)) {
-          contained++;
-      }
-    }
+    
     mpz_clear(value);
     mpz_clear(block_i);
     mpz_clear(pattern_i);
-    return (double)contained/(double)tests;
   }
+  return (double)contained/(double)tests;
 }
 
 void SerialFramework::validate_parameters(vector< vector<bool> > patterns, int bits, int store, int blocks, int tests) {
@@ -96,8 +102,8 @@ void SerialFramework::validate_parameters(vector< vector<bool> > patterns, int b
   }
 }
 
-bool SerialFramework::is_true_positive(string item) {
-  return find(stored.begin(), stored.end(), item) != stored.end();
+bool SerialFramework::is_true_positive(string item, string source) {
+  return find(stored[source].begin(), stored[source].end(), item) != stored[source].end();
 }
 
 vector<boost::dynamic_bitset<>*> SerialFramework::convert_patterns(vector<vector<bool>> patterns) {

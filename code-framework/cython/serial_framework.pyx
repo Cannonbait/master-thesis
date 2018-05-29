@@ -11,10 +11,7 @@ cdef class PySerialFramework:
     cdef SerialFramework sf
     def __cinit__(self):
       self.sf = SerialFramework()
-    def with_path(self, path):
-      c_path = str.encode(path)
-      self.sf = SerialFramework(c_path)
-    def test(self, patterns, bits, store, blocks, tests):
-      return self.sf.test(patterns.transpose(), bits, store, blocks, tests)
-    def test_no_path(self, patterns, bits, store, blocks, tests):
-      return self.sf.test_no_path(patterns.transpose(), bits, store, blocks, tests)
+    def add_source(self, source):
+      self.sf.add_source(str.encode(source))
+    def test(self, patterns, bits, store, blocks, tests, source):
+      return self.sf.test(patterns.transpose(), bits, store, blocks, tests, str.encode(source))
