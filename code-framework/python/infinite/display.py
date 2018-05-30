@@ -11,9 +11,9 @@ def display_data(results, settings):
     for result in results:
         ax.errorbar(result[0], result[1], result[2],fmt='-bo')
 
-    plt.xlabel("k value")
-    plt.ylabel("FPR")
-    plt.title("False positive rate as a funtion of k")
+    plt.xlabel("k value",fontsize=18)
+    plt.ylabel("FPR",fontsize=18)
+    plt.title("False positive rate as a funtion of k",fontsize=18)
     plt.grid(True)
     plt.show()
 

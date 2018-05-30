@@ -1,5 +1,6 @@
 from lcgfilter import PyLCGFilter
 from crsfilter import PyCRSFilter
+from pbloom import PyPatternBF
 import matplotlib.pyplot as plt
 import numpy as np
 import math
@@ -11,52 +12,73 @@ def progbar(curr, total, full_progbar):
 
 
 # CONSTANTS
-D_START = 50
+D_START = 180
+D_STEP  = 2
 D_END   = 200
-BITS    = 512
+BITS    = 509
 BLOCKS  = 1
 TESTS   = 100000
-LOOPS   = 40
+LOOPS   = 30
+
+x = range(D_START,D_END,D_STEP)
 
 # RESULT VECTORS
-lcg = [None]*(D_END-D_START)
-crs = [None]*(D_END-D_START)
+lcg = [None]*len(x)
+crs = [None]*len(x)
+fil = [None]*len(x)
 lcgloops = [None]*LOOPS
 crsloops = [None]*LOOPS
+filloops = [None]*LOOPS
+lcgdev = [None]*len(x)
+crsdev = [None]*len(x)
+fildev = [None]*len(x)
 
-total = LOOPS*(D_END-D_START)
-x = range(D_START,D_END)
+total = LOOPS*len(x)
+
 
 # MAIN LOOP
-for d in x:
+for ind, d in enumerate(x):
     for j in range(LOOPS):
         lcgfilt = PyLCGFilter(BITS,BLOCKS,d)
         crsfilt = PyCRSFilter(BITS,BLOCKS,d)
+        filt    = PyPatternBF(1,d,BLOCKS,BITS)
+        k = round(math.log(2)*BITS/d)
         # Populate filters
         for i in range(d):
             lcgfilt.add_random()
             crsfilt.add_random()
+            filt.add_random(0.0,k)
+
 
         false_positives_lcg = 0
         false_positives_crs = 0
+        false_positives_fil = 0
         for i in range(TESTS):
             if(lcgfilt.try_random()):
                 false_positives_lcg = false_positives_lcg + 1
             if(crsfilt.try_random()):
                 false_positives_crs = false_positives_crs + 1
+            if(filt.test_random_pattern(0.0,k)):
+                false_positives_fil = false_positives_fil + 1
         lcgloops[j] = false_positives_lcg/TESTS
         crsloops[j] = false_positives_crs/TESTS
+        filloops[j] = false_positives_fil/TESTS
     progbar(d-D_START+1,(D_END-D_START),40)
-    lcg[d-D_START] = np.mean(lcgloops)
-    crs[d-D_START] = np.mean(crsloops)
+    lcg[ind] = np.mean(lcgloops)
+    crs[ind] = np.mean(crsloops)
+    fil[ind] = np.mean(filloops)
+    lcgdev[ind] = np.std(lcgloops)
+    crsdev[ind] = np.std(crsloops)
+    fildev[ind] = np.std(filloops)
 
 fig, ax = plt.subplots()
-x = np.linspace(D_START,D_END,(D_END-D_START))
-ax.plot(x,lcg)
-ax.plot(x,crs)
-ax.plot(x, (1-math.e**(-(math.log(2)*BLOCKS*BITS/x)*x/BITS*BLOCKS))**(math.log(2)*BLOCKS*BITS/x))
-plt.xlabel("Stored items")
-plt.ylabel("FPR")
-plt.legend(["LCG-generator","CRS-generator","Theoretical Bloom filter"])
-plt.title("False positive rate as a funtion of stored items")
+x = np.linspace(D_START,D_END,len(x))
+ax.errorbar(x,lcg,lcgdev,fmt='-o')
+ax.errorbar(x,crs,crsdev,fmt='-o')
+ax.errorbar(x, fil,fildev,fmt='-o')
+ax.grid(True)
+plt.xlabel("d",fontsize=16)
+plt.ylabel("FPR",fontsize=16)
+plt.legend(["LCG-run-time pattern generator","MCRS-run-time pattern generator","Bloom filter"])
+plt.title("False positive rate as a funtion of d",fontsize=16)
 plt.show()

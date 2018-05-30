@@ -43,9 +43,9 @@ def _display_one_dimension(results, settings, dimensions):
         label = _interpret_parameter(dimensions[0][0])
     else:
         label = dimensions[0][0]
-    plt.xlabel(label)
-    plt.ylabel("FPR")
-    plt.title("False positive rate as a funtion of " + label)
+    plt.xlabel(label,fontsize=16)
+    plt.ylabel("FPR",fontsize=16)
+    plt.title("False positive rate as a funtion of " + label,fontsize=16)
     plt.grid(True)
     plt.show()
 

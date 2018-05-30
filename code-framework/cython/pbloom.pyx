@@ -20,3 +20,7 @@ cdef class PyPatternBF:
       self.c_pbf.add_many(x)
     def test_rng(self):
       return self.c_pbf.test_rng()
+    def test_random_pattern(self,level_prob,k):
+      return self.c_pbf.test_random_pattern(level_prob,k)
+    def add_random(self,level_prob,k):
+      self.c_pbf.add_random(level_prob,k)
