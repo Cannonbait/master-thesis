@@ -32,7 +32,7 @@ class Consumer(multiprocessing.Process):
                 break
             vals = [[] for source in self.sources]
             deviations = [[] for source in self.sources]
-            for i, pattern_generator in enumerate(next_task.pattern_generators):
+            for pattern_generator in next_task.pattern_generators:
                 temp_val = [[] for source in self.sources]
                 for trial in range(0, next_task.pattern_trials):
                     patterns = next_task.get_patterns(pattern_generator)
